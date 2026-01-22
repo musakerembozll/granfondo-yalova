@@ -1,0 +1,31 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle with amber gradient -->
+  <circle cx="32" cy="32" r="32" fill="#f59e0b"/>
+
+  <!-- Settings gear icon in white -->
+  <g transform="translate(32, 32)">
+    <!-- Outer gear teeth -->
+    <path d="M 0,-20 L 3,-17 L 3,-13 L 0,-10 L -3,-13 L -3,-17 Z" fill="white"/>
+    <path d="M 0,20 L -3,17 L -3,13 L 0,10 L 3,13 L 3,17 Z" fill="white"/>
+    <path d="M -20,0 L -17,-3 L -13,-3 L -10,0 L -13,3 L -17,3 Z" fill="white"/>
+    <path d="M 20,0 L 17,3 L 13,3 L 10,0 L 13,-3 L 17,-3 Z" fill="white"/>
+
+    <!-- Diagonal teeth -->
+    <path d="M -14.14,-14.14 L -11.31,-16.97 L -8.49,-16.97 L -7.07,-14.14 L -8.49,-11.31 L -11.31,-11.31 Z" fill="white"/>
+    <path d="M 14.14,14.14 L 11.31,16.97 L 8.49,16.97 L 7.07,14.14 L 8.49,11.31 L 11.31,11.31 Z" fill="white"/>
+    <path d="M 14.14,-14.14 L 16.97,-11.31 L 16.97,-8.49 L 14.14,-7.07 L 11.31,-8.49 L 11.31,-11.31 Z" fill="white"/>
+    <path d="M -14.14,14.14 L -16.97,11.31 L -16.97,8.49 L -14.14,7.07 L -11.31,8.49 L -11.31,11.31 Z" fill="white"/>
+
+    <!-- Center gear body -->
+    <circle cx="0" cy="0" r="12" fill="white"/>
+
+    <!-- Center hole -->
+    <circle cx="0" cy="0" r="5" fill="#f59e0b"/>
+
+    <!-- Admin badge indicator (small shield) -->
+    <g transform="translate(12, -12)">
+      <path d="M 0,-6 L 4,-4 L 4,2 C 4,4 2,6 0,7 C -2,6 -4,4 -4,2 L -4,-4 Z" fill="white" stroke="#d97706" stroke-width="0.5"/>
+      <text x="0" y="2" font-size="6" font-weight="bold" fill="#f59e0b" text-anchor="middle">A</text>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,30 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle with gradient -->
+  <circle cx="32" cy="32" r="32" fill="#059669"/>
+
+  <!-- Cyclist silhouette in white -->
+  <g transform="translate(12, 18)">
+    <!-- Bike frame -->
+    <path d="M8 20 L16 12 L24 12 L32 20" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M16 12 L14 20" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M24 12 L28 20" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Wheels -->
+    <circle cx="8" cy="22" r="5" stroke="white" stroke-width="2.5" fill="none"/>
+    <circle cx="32" cy="22" r="5" stroke="white" stroke-width="2.5" fill="none"/>
+
+    <!-- Rider body -->
+    <path d="M24 12 L26 6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Head -->
+    <circle cx="27" cy="4" r="3" fill="white"/>
+
+    <!-- Pedal and leg -->
+    <path d="M20 16 L18 20" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Speed lines for motion effect -->
+  <line x1="4" y1="28" x2="10" y2="28" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <line x1="2" y1="34" x2="8" y2="34" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <line x1="4" y1="40" x2="10" y2="40" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+</svg>

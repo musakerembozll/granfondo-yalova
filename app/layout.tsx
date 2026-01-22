@@ -68,10 +68,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr">
-      <head>
-        <link rel="icon" type="image/png" href="/favicon.png" />
-        <link rel="apple-touch-icon" href="/favicon.png" />
-      </head>
       <body className={`${inter.className} antialiased`}>
         <AuthProvider>
           {children}

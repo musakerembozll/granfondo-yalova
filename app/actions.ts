@@ -222,23 +222,19 @@ export async function updateApplicationStatus(id: string, status: "approved" | "
         return { success: false, message: error.message }
     }
 
-    // Send email notification
+    // Send email notification using template system
     try {
-        const { sendEmail, getApprovalEmailHtml, getRejectionEmailHtml } = await import('@/lib/email')
+        const { sendEmailWithTemplate } = await import('@/app/content-actions-email')
 
-        const emailHtml = status === 'approved'
-            ? getApprovalEmailHtml(app.full_name)
-            : getRejectionEmailHtml(app.full_name)
+        const templateKey = status === 'approved' ? 'approval' : 'rejection'
+        const variables = {
+            fullName: app.full_name,
+            category: app.category,
+            email: app.email,
+            reason: 'Başvurunuz incelendi ve bu aşamada onaylanamamıştır.'
+        }
 
-        const subject = status === 'approved'
-            ? '🎉 GranFondo Yalova - Başvurunuz Onaylandı!'
-            : 'GranFondo Yalova - Başvuru Durumu'
-
-        await sendEmail({
-            to: app.email,
-            subject,
-            html: emailHtml
-        })
+        await sendEmailWithTemplate(templateKey, app.email, variables)
     } catch (emailError) {
         console.error('Email send error:', emailError)
         // Don't fail the status update if email fails

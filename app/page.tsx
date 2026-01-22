@@ -11,7 +11,7 @@ import { SponsorsSection } from "@/components/landing/sponsors-section";
 import { SocialFeedSection } from "@/components/landing/social-feed-section";
 import { Footer } from "@/components/landing/footer";
 import { EventSchema, OrganizationSchema, WebsiteSchema } from "@/components/seo/structured-data";
-import { getGalleryItems, getTestimonials, getSponsors, getNews, getSiteSettings } from "@/app/content-actions";
+import { getGalleryItems, getTestimonials, getSponsors, getNews, getSiteSettings, getSectionSettings } from "@/app/content-actions";
 import { getSiteData } from "@/lib/site-content";
 import { formatEventDate } from "@/lib/date-utils";
 
@@ -23,8 +23,12 @@ export default async function Home() {
   const sponsors = await getSponsors()
   const news = await getNews(3)
   const siteSettings = await getSiteSettings()
+  const sectionSettings = await getSectionSettings()
   const { content, images } = await getSiteData()
   const formattedDate = formatEventDate(siteSettings.event_date)
+
+  // Helper function to check if section is visible (default to true if not set)
+  const isSectionVisible = (key: string) => sectionSettings[key] !== false
 
   return (
     <>
@@ -35,22 +39,24 @@ export default async function Home() {
 
       <main className="min-h-screen bg-slate-950 text-white selection:bg-emerald-500/30 flex flex-col">
         <Navbar />
-        <HeroSection
-          eventDate={formattedDate}
-          subtitle={content.hero_subtitle}
-          ctaText={content.hero_cta}
-          videoUrl={images.hero_video}
-          imageUrl={images.hero_image}
-        />
+        {isSectionVisible('hero') && (
+          <HeroSection
+            eventDate={formattedDate}
+            subtitle={content.hero_subtitle}
+            ctaText={content.hero_cta}
+            videoUrl={images.hero_video}
+            imageUrl={images.hero_image}
+          />
+        )}
         <CountdownTimer targetDate={siteSettings.event_date} />
-        <ParticipantCounter />
+        {isSectionVisible('counter') && <ParticipantCounter />}
         <InfoSection />
-        <GallerySection items={galleryItems} />
-        <TestimonialsSection items={testimonials} />
-        <NewsSection items={news} />
-        <FaqSection siteSettings={siteSettings} />
-        <SocialFeedSection />
-        <SponsorsSection items={sponsors} />
+        {isSectionVisible('gallery') && <GallerySection items={galleryItems} />}
+        {isSectionVisible('testimonials') && <TestimonialsSection items={testimonials} />}
+        {isSectionVisible('news') && <NewsSection items={news} />}
+        {isSectionVisible('faq') && <FaqSection siteSettings={siteSettings} />}
+        {isSectionVisible('social') && <SocialFeedSection />}
+        {isSectionVisible('sponsors') && <SponsorsSection items={sponsors} />}
         <Footer siteSettings={siteSettings} />
       </main>
     </>

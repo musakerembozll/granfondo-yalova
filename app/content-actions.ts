@@ -348,7 +348,8 @@ export async function updateSectionVisibility(sectionKey: string, isVisible: boo
         return { success: false }
     }
 
-    revalidatePath("/")
+    // Aggressive cache clearing to ensure changes are visible immediately
+    revalidatePath('/', 'layout')
     revalidatePath("/admin/sections")
     return { success: true }
 }

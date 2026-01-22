@@ -87,20 +87,13 @@ const contentSections = [
     },
 ]
 
-const imageItems: ImageItem[] = [
-    { key: "logo", label: "Site Logosu", url: "" },
-    { key: "favicon", label: "Favicon", url: "" },
-    { key: "hero_video", label: "Ana Sayfa Video", url: "" },
-    { key: "hero_image", label: "Ana Sayfa Görsel (Yedek)", url: "" },
-    { key: "og_image", label: "Sosyal Medya Paylaşım Görseli", url: "" },
-]
+// Görseller artık Unified Media Manager'da yönetiliyor
+// Bu sekme kaldırıldı
 
 export function ContentEditor() {
     const [content, setContent] = useState<Record<string, string>>({})
-    const [images, setImages] = useState<Record<string, string>>({})
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
-    const [uploadingKey, setUploadingKey] = useState<string | null>(null)
     const [activeSection, setActiveSection] = useState("hero")
 
     useEffect(() => {
@@ -122,19 +115,6 @@ export function ContentEditor() {
                 })
                 setContent(contentMap)
             }
-
-            // Fetch images
-            const { data: imageData } = await supabase
-                .from("site_images")
-                .select("*")
-
-            if (imageData) {
-                const imageMap: Record<string, string> = {}
-                imageData.forEach((item: any) => {
-                    imageMap[item.key] = item.url
-                })
-                setImages(imageMap)
-            }
         } catch (err) {
             console.error("Error fetching content:", err)
         } finally {
@@ -144,45 +124,6 @@ export function ContentEditor() {
 
     const handleContentChange = (key: string, value: string) => {
         setContent(prev => ({ ...prev, [key]: value }))
-    }
-
-    const handleImageChange = (key: string, value: string) => {
-        setImages(prev => ({ ...prev, [key]: value }))
-    }
-
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, key: string) => {
-        const file = e.target.files?.[0]
-        if (!file) return
-
-        if (file.size > 5 * 1024 * 1024) {
-            toast.error('Dosya boyutu en fazla 5MB olabilir')
-            return
-        }
-
-        setUploadingKey(key)
-        try {
-            const formData = new FormData()
-            formData.append('file', file)
-            formData.append('key', key)
-
-            const response = await fetch('/api/admin/upload', {
-                method: 'POST',
-                body: formData
-            })
-
-            const data = await response.json()
-
-            if (data.success) {
-                handleImageChange(key, data.url)
-                toast.success('Görsel yüklendi!')
-            } else {
-                toast.error(data.error || 'Yükleme başarısız')
-            }
-        } catch (error) {
-            toast.error('Yükleme sırasında hata oluştu')
-        } finally {
-            setUploadingKey(null)
-        }
     }
 
     const saveAllContent = async () => {
@@ -204,20 +145,7 @@ export function ContentEditor() {
                 }
             }
 
-            // Save images
-            for (const [key, url] of Object.entries(images)) {
-                if (url) {
-                    await supabase
-                        .from("site_images")
-                        .upsert({
-                            key,
-                            url,
-                            alt_text: key.replace(/_/g, " ")
-                        }, { onConflict: "key" })
-                }
-            }
-
-            toast.success("Tüm içerik kaydedildi!")
+            toast.success("İçerik kaydedildi!")
         } catch (error) {
             console.error("Save error:", error)
             toast.error("Kaydetme sırasında hata oluştu")
@@ -279,20 +207,26 @@ export function ContentEditor() {
                         {section.name}
                     </button>
                 ))}
-                <button
-                    onClick={() => setActiveSection("images")}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${activeSection === "images"
-                        ? "bg-purple-500 text-white"
-                        : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white"
-                        }`}
-                >
-                    <Image className="h-4 w-4" />
-                    Görseller
-                </button>
             </div>
 
+            {/* Görseller için bilgilendirme */}
+            <Card className="bg-purple-500/10 border-purple-500/20">
+                <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                        <Image className="h-5 w-5 text-purple-400 mt-0.5 flex-shrink-0" />
+                        <div>
+                            <p className="text-purple-300 font-medium mb-1">Görseller Taşındı!</p>
+                            <p className="text-purple-400 text-sm">
+                                Site görselleri (logo, favicon, hero video/image, vb.) artık <strong>Site Ayarları & Medya</strong> sayfasında yönetiliyor.
+                                {" "}<a href="/admin/site-settings" className="underline hover:text-purple-200">Buraya tıklayarak</a> medya yöneticisine gidin.
+                            </p>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
             {/* Content Section */}
-            {activeSection !== "images" && currentSection && (
+            {currentSection && (
                 <Card className="bg-slate-900/50 border-white/5">
                     <CardHeader>
                         <CardTitle className="text-white flex items-center gap-2">
@@ -324,70 +258,6 @@ export function ContentEditor() {
                                         placeholder={item.defaultValue || `${item.label} giriniz...`}
                                         className="bg-slate-800 border-white/10 text-white"
                                     />
-                                )}
-                            </div>
-                        ))}
-                    </CardContent>
-                </Card>
-            )}
-
-            {/* Images Section */}
-            {activeSection === "images" && (
-                <Card className="bg-slate-900/50 border-white/5">
-                    <CardHeader>
-                        <CardTitle className="text-white flex items-center gap-2">
-                            <Image className="h-5 w-5 text-purple-400" />
-                            Site Görselleri
-                        </CardTitle>
-                        <CardDescription className="text-slate-400">
-                            Logo, favicon ve arka plan görsellerini yönetin.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        {imageItems.map((item) => (
-                            <div key={item.key} className="p-4 bg-slate-800/50 rounded-xl border border-white/5 space-y-3">
-                                <label className="text-sm font-medium text-white flex items-center gap-2">
-                                    <Image className="h-4 w-4 text-purple-400" />
-                                    {item.label}
-                                </label>
-
-                                {/* URL Input */}
-                                <div className="flex gap-2">
-                                    <Input
-                                        value={images[item.key] || ""}
-                                        onChange={(e) => handleImageChange(item.key, e.target.value)}
-                                        placeholder="https://... görsel URL'si"
-                                        className="bg-slate-900 border-white/10 text-white flex-1"
-                                    />
-                                </div>
-
-                                {/* File Upload */}
-                                <div className="flex items-center gap-3">
-                                    <span className="text-xs text-slate-500">veya</span>
-                                    <label className="flex items-center gap-2 px-4 py-2 bg-slate-900 border border-white/10 rounded-lg cursor-pointer hover:bg-slate-700 transition-colors">
-                                        <Upload className="h-4 w-4 text-emerald-400" />
-                                        <span className="text-sm text-white">Dosya Yükle</span>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            className="hidden"
-                                            onChange={(e) => handleFileUpload(e, item.key)}
-                                        />
-                                    </label>
-                                    {uploadingKey === item.key && (
-                                        <Loader2 className="h-4 w-4 text-emerald-400 animate-spin" />
-                                    )}
-                                </div>
-
-                                {/* Preview */}
-                                {images[item.key] && !item.key.includes('video') && (
-                                    <div className="w-32 h-20 rounded-lg overflow-hidden bg-slate-900 border border-white/10">
-                                        <img
-                                            src={images[item.key]}
-                                            alt={item.label}
-                                            className="w-full h-full object-contain"
-                                        />
-                                    </div>
                                 )}
                             </div>
                         ))}

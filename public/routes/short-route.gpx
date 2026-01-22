@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="GranFondo Yalova">
+  <metadata>
+    <name>GranFondo Yalova - Kısa Parkur (55 km)</name>
+    <desc>Yalova şehir merkezi - Termal - Çınarcık rotası</desc>
+  </metadata>
+  <trk>
+    <name>Kısa Parkur</name>
+    <trkseg>
+      <!-- Yalova Merkez - Başlangıç -->
+      <trkpt lat="40.6550" lon="29.2750"><ele>10</ele></trkpt>
+      <trkpt lat="40.6580" lon="29.2800"><ele>15</ele></trkpt>
+      <trkpt lat="40.6620" lon="29.2900"><ele>25</ele></trkpt>
+      <!-- Sahil yolu -->
+      <trkpt lat="40.6700" lon="29.3000"><ele>20</ele></trkpt>
+      <trkpt lat="40.6800" lon="29.3150"><ele>30</ele></trkpt>
+      <trkpt lat="40.6900" lon="29.3300"><ele>50</ele></trkpt>
+      <!-- Termal'e doğru tırmanış -->
+      <trkpt lat="40.6950" lon="29.3450"><ele>120</ele></trkpt>
+      <trkpt lat="40.7000" lon="29.3600"><ele>250</ele></trkpt>
+      <trkpt lat="40.7050" lon="29.3750"><ele>380</ele></trkpt>
+      <trkpt lat="40.7100" lon="29.3850"><ele>450</ele></trkpt>
+      <!-- Termal -->
+      <trkpt lat="40.7150" lon="29.3950"><ele>520</ele></trkpt>
+      <trkpt lat="40.7200" lon="29.4100"><ele>480</ele></trkpt>
+      <!-- İniş - Çınarcık yönü -->
+      <trkpt lat="40.7150" lon="29.4250"><ele>350</ele></trkpt>
+      <trkpt lat="40.7100" lon="29.4400"><ele>220</ele></trkpt>
+      <trkpt lat="40.7050" lon="29.4550"><ele>120</ele></trkpt>
+      <!-- Çınarcık -->
+      <trkpt lat="40.6950" lon="29.4700"><ele>50</ele></trkpt>
+      <trkpt lat="40.6850" lon="29.4850"><ele>20</ele></trkpt>
+      <trkpt lat="40.6750" lon="29.5000"><ele>10</ele></trkpt>
+      <!-- Sahil dönüşü -->
+      <trkpt lat="40.6700" lon="29.4800"><ele>15</ele></trkpt>
+      <trkpt lat="40.6650" lon="29.4500"><ele>10</ele></trkpt>
+      <trkpt lat="40.6600" lon="29.4200"><ele>12</ele></trkpt>
+      <trkpt lat="40.6580" lon="29.3900"><ele>10</ele></trkpt>
+      <trkpt lat="40.6560" lon="29.3500"><ele>8</ele></trkpt>
+      <trkpt lat="40.6550" lon="29.3100"><ele>10</ele></trkpt>
+      <!-- Bitiş - Yalova Merkez -->
+      <trkpt lat="40.6550" lon="29.2750"><ele>10</ele></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

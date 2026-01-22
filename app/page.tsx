@@ -15,7 +15,7 @@ import { getGalleryItems, getTestimonials, getSponsors, getNews, getSiteSettings
 import { getSiteData } from "@/lib/site-content";
 import { formatEventDate } from "@/lib/date-utils";
 
-export const revalidate = 60; // Revalidate every 60 seconds
+export const revalidate = 30; // Revalidate every 30 seconds
 
 export default async function Home() {
   const galleryItems = await getGalleryItems()

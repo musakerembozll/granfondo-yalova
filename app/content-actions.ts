@@ -54,7 +54,7 @@ export async function updateSiteSettings(settings: SiteSettings) {
     }
 
     // Revalidate all pages that use site settings
-    revalidatePath('/')
+    revalidatePath('/', 'layout')
     revalidatePath('/basvuru')
     revalidatePath('/hakkinda')
     revalidatePath('/iletisim')

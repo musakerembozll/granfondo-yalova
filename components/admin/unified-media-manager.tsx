@@ -142,7 +142,7 @@ export function UnifiedMediaManager() {
       if (error) throw error
 
       // Merge with defaults
-      const allItems = mediaCategories.flatMap(cat => cat.items)
+      const allItems: MediaItem[] = mediaCategories.flatMap(cat => cat.items as MediaItem[])
       const merged = allItems.map(item => {
         const found = data?.find((d: any) => d.key === item.key)
         return found ? { ...item, url: found.url, alt_text: found.alt_text || item.alt_text } : item

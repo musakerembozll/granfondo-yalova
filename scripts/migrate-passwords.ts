@@ -14,6 +14,9 @@
  *   - Verifies each hash after creation
  */
 
+import { config } from 'dotenv'
+config({ path: '.env.local' })
+
 import { createClient } from '@supabase/supabase-js'
 import bcrypt from 'bcryptjs'
 

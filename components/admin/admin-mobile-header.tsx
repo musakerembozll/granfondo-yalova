@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X, LayoutDashboard, Calendar, Users, LogOut, Bike, BookOpen, Home } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { logout } from "@/app/login/actions"
+import { logoutAdmin } from "@/app/admin/auth-actions"
 
 const navItems = [
     { path: "/admin", name: "Dashboard", icon: LayoutDashboard },
@@ -80,8 +80,7 @@ export function AdminMobileHeader() {
                                     variant="ghost"
                                     className="w-full justify-start gap-3 px-4 text-red-400 hover:text-red-300 hover:bg-red-500/10"
                                     onClick={async () => {
-                                        await logout()
-                                        window.location.href = "/"
+                                        await logoutAdmin()
                                     }}
                                 >
                                     <LogOut className="h-5 w-5" />

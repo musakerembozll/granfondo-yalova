@@ -68,7 +68,7 @@ export const ApplicationSchema = z.object({
         .or(z.literal('')),
 
     category: z.enum(['long', 'short'], {
-        errorMap: () => ({ message: 'Geçerli bir kategori seçiniz' })
+        message: 'Geçerli bir kategori seçiniz'
     }),
 
     emergencyName: z.string()

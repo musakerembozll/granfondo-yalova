@@ -14,23 +14,30 @@ export interface AdminUser {
 }
 
 export async function loginAdmin(username: string, password: string) {
-    // Fetch user from database
-    const { data: user, error } = await supabase
-        .from('admin_users')
-        .select('id, username, password_hash, role, name, is_active')
-        .eq('username', username)
-        .single()
+    try {
+        // Fetch user from database
+        const { data: user, error } = await supabase
+            .from('admin_users')
+            .select('id, username, password_hash, role, name, is_active')
+            .eq('username', username)
+            .single()
 
-    if (error || !user) {
-        // Log failed attempt (for security monitoring)
-        console.warn('[Security] Failed login attempt for username:', username)
-        return { success: false, message: 'Kullanıcı adı veya şifre hatalı' }
-    }
+        if (error || !user) {
+            // Log failed attempt (for security monitoring)
+            console.warn('[Security] Failed login attempt for username:', username, error)
+            return { success: false, message: 'Kullanıcı adı veya şifre hatalı' }
+        }
 
     // Check if account is active
     if (!user.is_active) {
         console.warn('[Security] Login attempt for inactive account:', username)
         return { success: false, message: 'Hesap devre dışı bırakılmış' }
+    }
+
+    // Check if password hash exists (migration completed)
+    if (!user.password_hash) {
+        console.error('[Security] User has no password_hash - migration incomplete:', username)
+        return { success: false, message: 'Hesap yapılandırması tamamlanmamış. Lütfen yönetici ile iletişime geçin.' }
     }
 
     // Verify password using bcrypt (timing-safe comparison)
@@ -67,10 +74,14 @@ export async function loginAdmin(username: string, password: string) {
         .update({ last_login_at: new Date().toISOString() })
         .eq('id', user.id)
 
-    // Log successful login
-    console.info('[Security] Successful login for username:', username)
+        // Log successful login
+        console.info('[Security] Successful login for username:', username)
 
-    return { success: true, role: user.role }
+        return { success: true, role: user.role }
+    } catch (error) {
+        console.error('[Security] Login error:', error)
+        return { success: false, message: 'Bir hata oluştu. Lütfen tekrar deneyin.' }
+    }
 }
 
 export async function logoutAdmin() {

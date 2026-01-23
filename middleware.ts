@@ -2,6 +2,15 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 export function middleware(request: NextRequest) {
+    // Force HTTPS in production
+    if (process.env.NODE_ENV === 'production' &&
+        request.headers.get('x-forwarded-proto') !== 'https') {
+        return NextResponse.redirect(
+            `https://${request.headers.get('host')}${request.nextUrl.pathname}`,
+            301
+        )
+    }
+
     const isAdminPath = request.nextUrl.pathname.startsWith("/admin")
     const isLoginPath = request.nextUrl.pathname === "/admin/login"
     const hasSession = request.cookies.has("admin_session")

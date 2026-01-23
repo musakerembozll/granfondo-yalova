@@ -3,6 +3,8 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { verifyPassword } from "@/lib/auth/password"
+import { createJWT, SessionPayload } from "@/lib/auth/session"
 
 export interface AdminUser {
     id: string
@@ -12,31 +14,61 @@ export interface AdminUser {
 }
 
 export async function loginAdmin(username: string, password: string) {
-    // Check in admin_users table
+    // Fetch user from database
     const { data: user, error } = await supabase
         .from('admin_users')
-        .select('*')
+        .select('id, username, password_hash, role, name, is_active')
         .eq('username', username)
-        .eq('password', password) // In production, use hashed passwords!
         .single()
 
     if (error || !user) {
+        // Log failed attempt (for security monitoring)
+        console.warn('[Security] Failed login attempt for username:', username)
         return { success: false, message: 'Kullanıcı adı veya şifre hatalı' }
     }
 
-    // Set session cookie
-    const cookieStore = await cookies()
-    cookieStore.set('admin_session', JSON.stringify({
+    // Check if account is active
+    if (!user.is_active) {
+        console.warn('[Security] Login attempt for inactive account:', username)
+        return { success: false, message: 'Hesap devre dışı bırakılmış' }
+    }
+
+    // Verify password using bcrypt (timing-safe comparison)
+    const isPasswordValid = await verifyPassword(password, user.password_hash)
+
+    if (!isPasswordValid) {
+        // Log failed attempt
+        console.warn('[Security] Invalid password for username:', username)
+        return { success: false, message: 'Kullanıcı adı veya şifre hatalı' }
+    }
+
+    // Create JWT token
+    const sessionPayload: SessionPayload = {
         id: user.id,
         username: user.username,
         role: user.role,
         name: user.name
-    }), {
+    }
+
+    const token = await createJWT(sessionPayload)
+
+    // Set secure session cookie with JWT
+    const cookieStore = await cookies()
+    cookieStore.set('admin_session', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: true, // Always use secure cookies
+        sameSite: 'strict', // Strict CSRF protection
         maxAge: 60 * 60 * 24 * 7 // 1 week
     })
+
+    // Update last login timestamp
+    await supabase
+        .from('admin_users')
+        .update({ last_login_at: new Date().toISOString() })
+        .eq('id', user.id)
+
+    // Log successful login
+    console.info('[Security] Successful login for username:', username)
 
     return { success: true, role: user.role }
 }
@@ -49,15 +81,30 @@ export async function logoutAdmin() {
 
 export async function getAdminSession(): Promise<AdminUser | null> {
     const cookieStore = await cookies()
-    const session = cookieStore.get('admin_session')
+    const sessionCookie = cookieStore.get('admin_session')
 
-    if (!session?.value) {
+    if (!sessionCookie?.value) {
         return null
     }
 
     try {
-        return JSON.parse(session.value) as AdminUser
-    } catch {
+        // Verify JWT token
+        const { verifyJWT } = await import("@/lib/auth/session")
+        const payload = await verifyJWT(sessionCookie.value)
+
+        if (!payload) {
+            // Token invalid or expired
+            return null
+        }
+
+        return {
+            id: payload.id,
+            username: payload.username,
+            role: payload.role,
+            name: payload.name
+        }
+    } catch (error) {
+        console.error('[Security] Session verification error:', error)
         return null
     }
 }

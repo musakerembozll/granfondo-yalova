@@ -2,9 +2,19 @@
 
 import { supabase, Application } from "@/lib/supabase"
 import { revalidatePath } from "next/cache"
+import { ApplicationSchema, EventSchema } from "@/lib/validation/schemas"
+import { sanitizeText } from "@/lib/security/sanitize"
 
 export async function submitApplication(data: unknown) {
-    const typedData = data as any
+    // Validate input with Zod schema
+    const validationResult = ApplicationSchema.safeParse(data)
+
+    if (!validationResult.success) {
+        const errors = validationResult.error.issues.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
+        return { success: false, message: `Geçersiz veri: ${errors}` }
+    }
+
+    const typedData = validationResult.data
 
     const { data: newApp, error } = await supabase
         .from('applications')
@@ -53,15 +63,23 @@ export async function submitApplication(data: unknown) {
 }
 
 export async function createEvent(data: unknown) {
-    const typedData = data as any
+    // Validate input with Zod schema
+    const validationResult = EventSchema.safeParse(data)
+
+    if (!validationResult.success) {
+        const errors = validationResult.error.issues.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
+        return { success: false, message: `Geçersiz veri: ${errors}` }
+    }
+
+    const typedData = validationResult.data
 
     const { error } = await supabase
         .from('events')
         .insert({
-            title: typedData.title,
+            title: sanitizeText(typedData.title),
             date: typedData.date,
-            location: typedData.location,
-            status: 'published',
+            location: sanitizeText(typedData.location),
+            status: typedData.status || 'published',
             participants: 0
         })
 
@@ -92,14 +110,22 @@ export async function getEvent(id: string) {
 }
 
 export async function updateEvent(id: string, data: unknown) {
-    const typedData = data as any
+    // Validate input with Zod schema
+    const validationResult = EventSchema.safeParse(data)
+
+    if (!validationResult.success) {
+        const errors = validationResult.error.issues.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
+        return { success: false, message: `Geçersiz veri: ${errors}` }
+    }
+
+    const typedData = validationResult.data
 
     const { error } = await supabase
         .from('events')
         .update({
-            title: typedData.title,
+            title: sanitizeText(typedData.title),
             date: typedData.date,
-            location: typedData.location,
+            location: sanitizeText(typedData.location),
             status: typedData.status || 'published'
         })
         .eq('id', id)

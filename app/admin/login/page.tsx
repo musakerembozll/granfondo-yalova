@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { login } from "@/app/login/actions"
+import { loginAdmin } from "@/app/admin/auth-actions"
 import { useToast } from "@/components/ui/use-toast"
 import {
     Form,
@@ -41,7 +41,7 @@ export default function LoginPage() {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setLoading(true)
         try {
-            const result = await login(values)
+            const result = await loginAdmin(values.username, values.password)
             if (result.success) {
                 toast({
                     title: "Giriş Başarılı",
@@ -53,7 +53,7 @@ export default function LoginPage() {
             } else {
                 toast({
                     title: "Giriş Başarısız",
-                    description: "Kullanıcı adı veya şifre hatalı.",
+                    description: result.message || "Kullanıcı adı veya şifre hatalı.",
                     variant: "destructive",
                 })
             }
@@ -118,7 +118,7 @@ export default function LoginPage() {
                 </Form>
 
                 <div className="text-center text-xs text-slate-500">
-                    <p>Demo Credentials: admin / admin123</p>
+                    <p>Güvenli Giriş Sistemi v2.0</p>
                 </div>
             </div>
         </div>

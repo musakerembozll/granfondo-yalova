@@ -13,7 +13,16 @@
       "Bash(git stash:*)",
       "Bash(npm run build:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(node -e:*)",
+      "Bash(vercel env add:*)",
+      "Bash(npm run migrate:passwords:*)",
+      "Bash(git push:*)",
+      "Bash(vercel list:*)",
+      "Bash(vercel logs:*)",
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(npm uninstall:*)"
     ]
   }
 }

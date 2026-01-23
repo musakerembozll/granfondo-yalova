@@ -1,55 +1,9 @@
-import DOMPurify from 'isomorphic-dompurify'
-
 /**
- * HTML sanitization utilities to prevent XSS attacks
+ * Server-safe HTML sanitization utilities to prevent XSS attacks
+ *
+ * NOTE: This is a simplified sanitizer for server-side use.
+ * For rich HTML content, consider using a proper HTML parser.
  */
-
-/**
- * Allowed HTML tags for email templates
- */
-const ALLOWED_TAGS = [
-    'p', 'br', 'strong', 'b', 'em', 'i', 'u',
-    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-    'ul', 'ol', 'li',
-    'div', 'span',
-    'a', 'img',
-    'table', 'thead', 'tbody', 'tr', 'th', 'td'
-]
-
-/**
- * Allowed HTML attributes
- */
-const ALLOWED_ATTR = [
-    'href', 'src', 'alt', 'title',
-    'class', 'style',
-    'width', 'height',
-    'align', 'valign'
-]
-
-/**
- * Sanitize HTML content for email templates
- * Allows safe HTML tags while removing dangerous elements
- */
-export function sanitizeEmailHTML(html: string): string {
-    return DOMPurify.sanitize(html, {
-        ALLOWED_TAGS,
-        ALLOWED_ATTR,
-        ALLOW_DATA_ATTR: false,
-        ALLOW_UNKNOWN_PROTOCOLS: false,
-        ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
-    })
-}
-
-/**
- * Sanitize user input text (removes all HTML)
- * Use for plain text fields like names, addresses, etc.
- */
-export function sanitizeText(text: string): string {
-    return DOMPurify.sanitize(text, {
-        ALLOWED_TAGS: [],
-        ALLOWED_ATTR: []
-    })
-}
 
 /**
  * Escape HTML special characters
@@ -65,6 +19,54 @@ export function escapeHTML(text: string): string {
 }
 
 /**
+ * Sanitize user input text (removes all HTML)
+ * Use for plain text fields like names, addresses, etc.
+ */
+export function sanitizeText(text: string): string {
+    // Remove all HTML tags
+    return text.replace(/<[^>]*>/g, '')
+}
+
+/**
+ * Sanitize HTML content for email templates
+ * This is a basic implementation that strips dangerous tags
+ * while preserving safe formatting tags
+ */
+export function sanitizeEmailHTML(html: string): string {
+    // For now, we'll use a simple approach:
+    // 1. Remove script tags and their content
+    // 2. Remove event handlers (onclick, onload, etc.)
+    // 3. Remove dangerous tags (iframe, object, embed, etc.)
+
+    let sanitized = html
+
+    // Remove script tags and content
+    sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+
+    // Remove event handlers
+    sanitized = sanitized.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
+    sanitized = sanitized.replace(/\s*on\w+\s*=\s*[^\s>]*/gi, '')
+
+    // Remove dangerous tags
+    const dangerousTags = ['iframe', 'object', 'embed', 'applet', 'link', 'style', 'meta', 'base']
+    dangerousTags.forEach(tag => {
+        const regex = new RegExp(`<${tag}\\b[^<]*(?:(?!<\\/${tag}>)<[^<]*)*<\\/${tag}>`, 'gi')
+        sanitized = sanitized.replace(regex, '')
+        // Also remove self-closing tags
+        const selfClosing = new RegExp(`<${tag}\\b[^>]*\\/?>`, 'gi')
+        sanitized = sanitized.replace(selfClosing, '')
+    })
+
+    // Remove javascript: and data: protocols
+    sanitized = sanitized.replace(/href\s*=\s*["']?\s*javascript:/gi, 'href="#"')
+    sanitized = sanitized.replace(/src\s*=\s*["']?\s*javascript:/gi, 'src=""')
+    sanitized = sanitized.replace(/href\s*=\s*["']?\s*data:/gi, 'href="#"')
+    sanitized = sanitized.replace(/src\s*=\s*["']?\s*data:/gi, 'src=""')
+
+    return sanitized
+}
+
+/**
  * Sanitize and escape template variables
  * Replaces {{variableName}} with escaped values
  */
@@ -76,9 +78,9 @@ export function replaceTemplateVariables(
 
     for (const [key, value] of Object.entries(variables)) {
         const placeholder = new RegExp(`{{${key}}}`, 'g')
-        // Sanitize the value to prevent injection
-        const sanitizedValue = sanitizeText(value)
-        result = result.replace(placeholder, sanitizedValue)
+        // Escape the value to prevent injection
+        const escapedValue = escapeHTML(value)
+        result = result.replace(placeholder, escapedValue)
     }
 
     return result

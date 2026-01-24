@@ -176,7 +176,7 @@ export function ContentEditor() {
                     <Button
                         variant="outline"
                         onClick={fetchContent}
-                        className="border-white/10 text-slate-400 hover:text-white"
+                        className="border-white/10 text-white hover:bg-slate-700"
                     >
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Yenile
@@ -184,7 +184,7 @@ export function ContentEditor() {
                     <Button
                         onClick={saveAllContent}
                         disabled={saving}
-                        className="bg-emerald-500 hover:bg-emerald-600"
+                        className="bg-emerald-500 hover:bg-emerald-600 text-white"
                     >
                         {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
                         Tümünü Kaydet
@@ -235,6 +235,10 @@ export function ContentEditor() {
                         </CardTitle>
                         <CardDescription className="text-slate-400">
                             {currentSection.description || "Bu bölümdeki yazıları düzenleyin."}
+                            <br />
+                            <span className="text-xs text-slate-500 mt-1 block">
+                                💡 Her alanın üzerindeki ipucu metnini okuyarak hangi sayfada kullanıldığını öğrenebilirsiniz.
+                            </span>
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">

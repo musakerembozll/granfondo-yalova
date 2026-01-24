@@ -3,12 +3,20 @@ import { Bike, Bell, Calendar, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/landing/navbar"
 import { Footer } from "@/components/landing/footer"
+import { getActiveEvent } from "@/app/actions"
+import { getSiteSettings } from "@/app/content-actions"
+import { ApplicationForm } from "@/components/forms/application-form"
 
-// Application status - set to false when applications are not open
-const APPLICATIONS_OPEN = false
+export const revalidate = 30
 
-export default function ApplicationPage() {
-    if (!APPLICATIONS_OPEN) {
+export default async function ApplicationPage() {
+    const activeEvent = await getActiveEvent()
+    const siteSettings = await getSiteSettings()
+    
+    // Use active event's applications_open status, or default to false
+    const applicationsOpen = activeEvent?.applications_open ?? false
+    
+    if (!applicationsOpen) {
         return (
             <main className="min-h-screen bg-slate-950 text-white flex flex-col">
                 <Navbar />
@@ -89,6 +97,18 @@ export default function ApplicationPage() {
     }
 
     // If applications are open, show the regular form
-    // This code won't run while APPLICATIONS_OPEN is false
-    return null
+    return (
+        <main className="min-h-screen bg-slate-950 text-white flex flex-col">
+            <Navbar />
+            <div className="flex-1 pt-28 pb-16">
+                <div className="container px-4 mx-auto max-w-4xl">
+                    <ApplicationForm 
+                        siteSettings={siteSettings}
+                        activeEvent={activeEvent}
+                    />
+                </div>
+            </div>
+            <Footer />
+        </main>
+    )
 }

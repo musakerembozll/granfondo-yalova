@@ -29,9 +29,11 @@ import { useToast } from "@/components/ui/use-toast"
 import { SiteSettings } from "@/app/content-actions"
 import { useAuth } from "@/contexts/auth-context"
 import { supabase } from "@/lib/supabase"
+import { Event } from "@/lib/supabase"
 
 interface ApplicationFormProps {
     siteSettings: SiteSettings
+    activeEvent?: Event | null
 }
 
 const formSchema = z.object({
@@ -52,7 +54,10 @@ const formSchema = z.object({
     }),
 })
 
-export function ApplicationForm({ siteSettings }: ApplicationFormProps) {
+export function ApplicationForm({ siteSettings, activeEvent }: ApplicationFormProps) {
+    // Use prices from active event if available, otherwise fall back to site settings
+    const shortPrice = activeEvent?.short_price ?? siteSettings.short_price
+    const longPrice = activeEvent?.long_price ?? siteSettings.long_price
     const router = useRouter()
     const { toast } = useToast()
     const searchParams = useSearchParams()
@@ -406,8 +411,8 @@ export function ApplicationForm({ siteSettings }: ApplicationFormProps) {
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent className="bg-slate-900 border-slate-800 text-white">
-                                                    <SelectItem value="short">Kısa Parkur (55km) - {siteSettings.short_price} TL</SelectItem>
-                                                    <SelectItem value="long">Uzun Parkur (98km) - {siteSettings.long_price} TL</SelectItem>
+                                                    <SelectItem value="short">Kısa Parkur (55km) - {shortPrice} TL</SelectItem>
+                                                    <SelectItem value="long">Uzun Parkur (98km) - {longPrice} TL</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                             <FormDescription className="text-slate-500">

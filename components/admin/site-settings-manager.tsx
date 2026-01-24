@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Save, RefreshCw, Image as ImageIcon, Settings } from "lucide-react"
+import { Save, RefreshCw, Image as ImageIcon, Settings, Info } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
 import { updateSiteSettings, SiteSettings } from "@/app/content-actions"
@@ -108,29 +108,18 @@ export function SiteSettingsManager() {
                 </CardContent>
             </Card>
 
-            {/* Fiyatlandırma */}
-            <Card className="bg-slate-900/50 border-white/5">
-                <CardHeader>
-                    <CardTitle className="text-white">Fiyatlandırma</CardTitle>
-                </CardHeader>
-                <CardContent className="grid md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="text-sm text-slate-400 block mb-2">Kısa Parkur Ücreti (TL)</label>
-                        <Input
-                            type="number"
-                            value={settings.short_price}
-                            onChange={(e) => setSettings({ ...settings, short_price: Number(e.target.value) })}
-                            className="bg-slate-800 border-white/10 text-white"
-                        />
-                    </div>
-                    <div>
-                        <label className="text-sm text-slate-400 block mb-2">Uzun Parkur Ücreti (TL)</label>
-                        <Input
-                            type="number"
-                            value={settings.long_price}
-                            onChange={(e) => setSettings({ ...settings, long_price: Number(e.target.value) })}
-                            className="bg-slate-800 border-white/10 text-white"
-                        />
+            {/* Bilgilendirme */}
+            <Card className="bg-blue-500/10 border-blue-500/20">
+                <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                        <Info className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
+                        <div>
+                            <p className="text-blue-300 font-medium mb-1">Fiyatlandırma Artık Etkinliklerde!</p>
+                            <p className="text-blue-400 text-sm">
+                                Fiyatlandırma ayarları artık <strong>Etkinlikler</strong> bölümünden yönetiliyor. 
+                                Her etkinlik için ayrı fiyat belirleyebilirsiniz.
+                            </p>
+                        </div>
                     </div>
                 </CardContent>
             </Card>
@@ -198,7 +187,7 @@ export function SiteSettingsManager() {
                 <Button
                     onClick={saveSettings}
                     disabled={saving}
-                    className="bg-emerald-500 hover:bg-emerald-600"
+                    className="bg-emerald-500 hover:bg-emerald-600 text-white"
                 >
                     <Save className="h-4 w-4 mr-2" />
                     {saving ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}

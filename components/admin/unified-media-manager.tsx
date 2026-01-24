@@ -367,7 +367,7 @@ export function UnifiedMediaManager() {
                             variant="outline"
                             onClick={() => fileInputRefs.current[item.key]?.click()}
                             disabled={isUploading}
-                            className="bg-slate-800 border-white/10 hover:bg-slate-700"
+                            className="bg-slate-800 border-white/10 hover:bg-slate-700 text-white"
                           >
                             {isUploading ? (
                               <>
@@ -386,7 +386,7 @@ export function UnifiedMediaManager() {
                             size="sm"
                             onClick={() => handleSave(item.key)}
                             disabled={isSaving}
-                            className="bg-emerald-500 hover:bg-emerald-600"
+                            className="bg-emerald-500 hover:bg-emerald-600 text-white"
                           >
                             {isSaving ? (
                               <>

@@ -22,7 +22,10 @@
       "Bash(vercel logs:*)",
       "Bash(npm run dev:*)",
       "Bash(curl:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(gh pr create:*)",
+      "Bash(vercel:*)",
+      "Bash(findstr:*)"
     ]
   }
 }

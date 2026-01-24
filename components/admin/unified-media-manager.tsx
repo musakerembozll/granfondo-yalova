@@ -406,24 +406,50 @@ export function UnifiedMediaManager() {
                       {/* Preview */}
                       {item.url && (
                         <div className="mt-3 p-3 bg-slate-900/50 rounded border border-white/5">
-                          <p className="text-xs text-slate-500 mb-2">Önizleme:</p>
+                          <p className="text-xs text-slate-400 mb-2">Önizleme:</p>
                           {item.key === 'hero_video' ? (
-                            <video
-                              src={item.url}
-                              className="w-full h-32 object-cover rounded"
-                              muted
-                              loop
-                              autoPlay
-                            />
+                            <div className="w-full aspect-video rounded overflow-hidden bg-slate-800">
+                              <video
+                                src={item.url}
+                                className="w-full h-full object-contain rounded"
+                                muted
+                                loop
+                                autoPlay
+                              />
+                            </div>
+                          ) : item.key === 'logo' || item.key === 'favicon' ? (
+                            <div className="w-32 aspect-square rounded overflow-hidden bg-slate-800 flex items-center justify-center">
+                              <img
+                                src={item.url}
+                                alt={item.alt_text}
+                                className="w-full h-full object-contain rounded"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).style.display = 'none'
+                                }}
+                              />
+                            </div>
+                          ) : item.key === 'og_image' ? (
+                            <div className="w-full aspect-[1.91/1] rounded overflow-hidden bg-slate-800">
+                              <img
+                                src={item.url}
+                                alt={item.alt_text}
+                                className="w-full h-full object-contain rounded"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).style.display = 'none'
+                                }}
+                              />
+                            </div>
                           ) : (
-                            <img
-                              src={item.url}
-                              alt={item.alt_text}
-                              className="w-full h-32 object-cover rounded"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = 'none'
-                              }}
-                            />
+                            <div className="w-full aspect-video rounded overflow-hidden bg-slate-800">
+                              <img
+                                src={item.url}
+                                alt={item.alt_text}
+                                className="w-full h-full object-contain rounded"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).style.display = 'none'
+                                }}
+                              />
+                            </div>
                           )}
                         </div>
                       )}

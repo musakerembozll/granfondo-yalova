@@ -133,9 +133,18 @@ export const EventSchema = z.object({
         .min(2, 'Konum en az 2 karakter olmalıdır')
         .max(200, 'Konum en fazla 200 karakter olabilir'),
 
-    status: z.enum(['published', 'draft'])
+    status: z.enum(['published', 'draft', 'cancelled'])
         .optional()
-        .default('published')
+        .default('published'),
+
+    active_event: z.boolean().optional(),
+    photo_url: z.string().url('Geçersiz URL formatı').optional().or(z.literal('')),
+    description: z.string().max(5000, 'Açıklama en fazla 5000 karakter olabilir').optional(),
+    background_image_url: z.string().url('Geçersiz URL formatı').optional().or(z.literal('')),
+    theme_color: z.string().optional(),
+    applications_open: z.boolean().optional(),
+    short_price: z.number().min(0, 'Fiyat negatif olamaz').optional(),
+    long_price: z.number().min(0, 'Fiyat negatif olamaz').optional()
 })
 
 export type EventInput = z.infer<typeof EventSchema>

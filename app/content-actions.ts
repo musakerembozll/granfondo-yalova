@@ -543,4 +543,70 @@ export async function deleteNews(id: string) {
     return { success: true }
 }
 
+// ============================================
+// ABOUT PAGE CONTENT
+// ============================================
+
+export async function getAboutPageContent() {
+    const { data, error } = await supabase
+        .from('about_page_content')
+        .select('*')
+
+    if (error) {
+        console.error('Get about page content error:', error)
+        return {
+            story: null,
+            stats: [],
+            values: [],
+            team: []
+        }
+    }
+
+    const result: {
+        story: any
+        stats: any[]
+        values: any[]
+        team: any[]
+    } = {
+        story: null,
+        stats: [],
+        values: [],
+        team: []
+    }
+
+    data?.forEach(item => {
+        if (item.content_type === 'story') {
+            result.story = item.data
+        } else if (item.content_type === 'stats') {
+            result.stats = Array.isArray(item.data) ? item.data : []
+        } else if (item.content_type === 'values') {
+            result.values = Array.isArray(item.data) ? item.data : []
+        } else if (item.content_type === 'team') {
+            result.team = Array.isArray(item.data) ? item.data : []
+        }
+    })
+
+    return result
+}
+
+export async function updateAboutPageContent(contentType: 'story' | 'stats' | 'values' | 'team', data: any) {
+    const { error } = await supabase
+        .from('about_page_content')
+        .upsert({
+            content_type: contentType,
+            data: data
+        }, {
+            onConflict: 'content_type'
+        })
+
+    if (error) {
+        console.error('Update about page content error:', error)
+        return { success: false, message: error.message }
+    }
+
+    revalidatePath("/hakkinda")
+    revalidatePath("/admin/content")
+    return { success: true }
+}
+
 

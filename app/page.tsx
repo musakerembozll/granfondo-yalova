@@ -14,6 +14,7 @@ import { EventSchema, OrganizationSchema, WebsiteSchema } from "@/components/seo
 import { getGalleryItems, getTestimonials, getSponsors, getNews, getSiteSettings, getSectionSettings } from "@/app/content-actions";
 import { getSiteData } from "@/lib/site-content";
 import { formatEventDate } from "@/lib/date-utils";
+import { getActiveEvent } from "@/app/actions";
 
 export const revalidate = 30; // Revalidate every 30 seconds
 
@@ -25,7 +26,12 @@ export default async function Home() {
   const siteSettings = await getSiteSettings()
   const sectionSettings = await getSectionSettings()
   const { content, images } = await getSiteData()
-  const formattedDate = formatEventDate(siteSettings.event_date)
+  const activeEvent = await getActiveEvent()
+
+  // Use active event data if available, otherwise fall back to site settings
+  const eventDate = activeEvent ? formatEventDate(activeEvent.date) : formatEventDate(siteSettings.event_date)
+  const heroImageUrl = activeEvent?.background_image_url || images.hero_image
+  const heroVideoUrl = images.hero_video // Keep video from site settings for now
 
   // Helper function to check if section is visible (default to true if not set)
   const isSectionVisible = (key: string) => sectionSettings[key] !== false
@@ -41,14 +47,14 @@ export default async function Home() {
         <Navbar />
         {isSectionVisible('hero') && (
           <HeroSection
-            eventDate={formattedDate}
+            eventDate={eventDate}
             subtitle={content.hero_subtitle}
             ctaText={content.hero_cta}
-            videoUrl={images.hero_video}
-            imageUrl={images.hero_image}
+            videoUrl={heroVideoUrl}
+            imageUrl={heroImageUrl}
           />
         )}
-        <CountdownTimer targetDate={siteSettings.event_date} />
+        <CountdownTimer targetDate={activeEvent?.date || siteSettings.event_date} />
         {isSectionVisible('counter') && <ParticipantCounter />}
         <InfoSection />
         {isSectionVisible('gallery') && <GallerySection items={galleryItems} />}

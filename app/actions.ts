@@ -73,6 +73,14 @@ export async function createEvent(data: unknown) {
 
     const typedData = validationResult.data
 
+    // If setting as active, first deactivate all other events
+    if (typedData.active_event) {
+        await supabase
+            .from('events')
+            .update({ active_event: false })
+            .eq('active_event', true)
+    }
+
     const { error } = await supabase
         .from('events')
         .insert({
@@ -80,7 +88,15 @@ export async function createEvent(data: unknown) {
             date: typedData.date,
             location: sanitizeText(typedData.location),
             status: typedData.status || 'published',
-            participants: 0
+            participants: 0,
+            active_event: typedData.active_event || false,
+            photo_url: typedData.photo_url || null,
+            description: typedData.description ? sanitizeText(typedData.description) : null,
+            background_image_url: typedData.background_image_url || null,
+            theme_color: typedData.theme_color || null,
+            applications_open: typedData.applications_open !== undefined ? typedData.applications_open : true,
+            short_price: typedData.short_price || null,
+            long_price: typedData.long_price || null
         })
 
     if (error) {
@@ -90,6 +106,7 @@ export async function createEvent(data: unknown) {
 
     revalidatePath("/admin")
     revalidatePath("/admin/events")
+    revalidatePath("/")
 
     return { success: true, message: "Etkinlik başarıyla oluşturuldu." }
 }
@@ -120,14 +137,35 @@ export async function updateEvent(id: string, data: unknown) {
 
     const typedData = validationResult.data
 
+    // If setting as active, first deactivate all other events
+    if (typedData.active_event) {
+        await supabase
+            .from('events')
+            .update({ active_event: false })
+            .eq('active_event', true)
+            .neq('id', id)
+    }
+
+    const updateData: any = {
+        title: sanitizeText(typedData.title),
+        date: typedData.date,
+        location: sanitizeText(typedData.location),
+        status: typedData.status || 'published'
+    }
+
+    // Only update optional fields if they are provided
+    if (typedData.active_event !== undefined) updateData.active_event = typedData.active_event
+    if (typedData.photo_url !== undefined) updateData.photo_url = typedData.photo_url || null
+    if (typedData.description !== undefined) updateData.description = typedData.description ? sanitizeText(typedData.description) : null
+    if (typedData.background_image_url !== undefined) updateData.background_image_url = typedData.background_image_url || null
+    if (typedData.theme_color !== undefined) updateData.theme_color = typedData.theme_color || null
+    if (typedData.applications_open !== undefined) updateData.applications_open = typedData.applications_open
+    if (typedData.short_price !== undefined) updateData.short_price = typedData.short_price || null
+    if (typedData.long_price !== undefined) updateData.long_price = typedData.long_price || null
+
     const { error } = await supabase
         .from('events')
-        .update({
-            title: sanitizeText(typedData.title),
-            date: typedData.date,
-            location: sanitizeText(typedData.location),
-            status: typedData.status || 'published'
-        })
+        .update(updateData)
         .eq('id', id)
 
     if (error) {
@@ -137,6 +175,7 @@ export async function updateEvent(id: string, data: unknown) {
 
     revalidatePath("/admin")
     revalidatePath("/admin/events")
+    revalidatePath("/")
 
     return { success: true, message: "Etkinlik başarıyla güncellendi." }
 }
@@ -223,6 +262,49 @@ export async function getEvents() {
     }
 
     return data || []
+}
+
+export async function getActiveEvent() {
+    const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('active_event', true)
+        .single()
+
+    if (error) {
+        // No active event found is not an error
+        if (error.code === 'PGRST116') {
+            return null
+        }
+        console.error('Get active event error:', error)
+        return null
+    }
+
+    return data
+}
+
+export async function setActiveEvent(eventId: string) {
+    // First, deactivate all events
+    await supabase
+        .from('events')
+        .update({ active_event: false })
+        .eq('active_event', true)
+
+    // Then activate the selected event
+    const { error } = await supabase
+        .from('events')
+        .update({ active_event: true })
+        .eq('id', eventId)
+
+    if (error) {
+        console.error('Set active event error:', error)
+        return { success: false, message: error.message }
+    }
+
+    revalidatePath("/admin/events")
+    revalidatePath("/")
+
+    return { success: true, message: "Aktif etkinlik güncellendi." }
 }
 
 export async function updateApplicationStatus(id: string, status: "approved" | "rejected") {

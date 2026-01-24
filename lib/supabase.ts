@@ -37,8 +37,16 @@ export interface Event {
     title: string
     date: string
     location: string
-    status: 'published' | 'draft'
+    status: 'published' | 'draft' | 'cancelled'
     participants: number
+    active_event?: boolean
+    photo_url?: string
+    description?: string
+    background_image_url?: string
+    theme_color?: string // OKLCH format
+    applications_open?: boolean
+    short_price?: number
+    long_price?: number
     created_at: string
 }
 

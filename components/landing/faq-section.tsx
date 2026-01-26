@@ -3,10 +3,10 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronDown } from "lucide-react"
-import { SiteSettings } from "@/app/content-actions"
+import { Event } from "@/lib/supabase"
 
 interface FaqSectionProps {
-    siteSettings?: SiteSettings
+    activeEvent?: Event | null
 }
 
 const getDefaultFaqs = (shortPrice: number, longPrice: number) => [
@@ -44,9 +44,9 @@ const getDefaultFaqs = (shortPrice: number, longPrice: number) => [
     }
 ]
 
-export function FaqSection({ siteSettings }: FaqSectionProps) {
+export function FaqSection({ activeEvent }: FaqSectionProps) {
     const [openIndex, setOpenIndex] = useState<number | null>(null)
-    const faqs = getDefaultFaqs(siteSettings?.short_price || 500, siteSettings?.long_price || 750)
+    const faqs = getDefaultFaqs(activeEvent?.short_price || 500, activeEvent?.long_price || 750)
 
     return (
         <section className="py-24 bg-slate-900">

@@ -28,6 +28,13 @@ export interface Event {
     location: string;
     status: "published" | "draft";
     participants: number;
+    bank_name?: string;
+    account_holder?: string;
+    iban?: string;
+    contact_email?: string;
+    contact_phone?: string;
+    hero_video_url?: string;
+    theme_preset?: string;
 }
 
 export interface DB {

@@ -62,10 +62,10 @@ export default async function Home() {
         {isSectionVisible('gallery') && <GallerySection items={galleryItems} />}
         {isSectionVisible('testimonials') && <TestimonialsSection items={testimonials} />}
         {isSectionVisible('news') && <NewsSection items={news} />}
-        {isSectionVisible('faq') && <FaqSection siteSettings={siteSettings} />}
+        {isSectionVisible('faq') && <FaqSection activeEvent={activeEvent} />}
         {isSectionVisible('social') && <SocialFeedSection />}
         {isSectionVisible('sponsors') && <SponsorsSection items={sponsors} />}
-        <Footer siteSettings={siteSettings} />
+        <Footer activeEvent={activeEvent} />
       </main>
     </>
   );

@@ -55,9 +55,9 @@ const formSchema = z.object({
 })
 
 export function ApplicationForm({ siteSettings, activeEvent }: ApplicationFormProps) {
-    // Use prices from active event if available, otherwise fall back to site settings
-    const shortPrice = activeEvent?.short_price ?? siteSettings.short_price
-    const longPrice = activeEvent?.long_price ?? siteSettings.long_price
+    // Prices now come from active event only
+    const shortPrice = activeEvent?.short_price ?? 500
+    const longPrice = activeEvent?.long_price ?? 750
     const router = useRouter()
     const { toast } = useToast()
     const searchParams = useSearchParams()
@@ -192,7 +192,7 @@ export function ApplicationForm({ siteSettings, activeEvent }: ApplicationFormPr
     }
 
     const selectedCategory = form.watch("category")
-    const price = selectedCategory === "long" ? `${siteSettings.long_price} TL` : selectedCategory === "short" ? `${siteSettings.short_price} TL` : "---"
+    const price = selectedCategory === "long" ? `${longPrice} TL` : selectedCategory === "short" ? `${shortPrice} TL` : "---"
 
     // Show loading while checking auth
     if (authLoading || checkingApplication) {
@@ -229,7 +229,7 @@ export function ApplicationForm({ siteSettings, activeEvent }: ApplicationFormPr
                         </div>
                     </div>
                 </div>
-                <Footer siteSettings={siteSettings} />
+                <Footer activeEvent={activeEvent} />
             </main>
         )
     }
@@ -254,7 +254,7 @@ export function ApplicationForm({ siteSettings, activeEvent }: ApplicationFormPr
                         </Link>
                     </div>
                 </div>
-                <Footer siteSettings={siteSettings} />
+                <Footer activeEvent={activeEvent} />
             </main>
         )
     }
@@ -492,29 +492,29 @@ export function ApplicationForm({ siteSettings, activeEvent }: ApplicationFormPr
                                     <div className="grid md:grid-cols-2 gap-4 mb-4">
                                         <div className="bg-slate-950/50 rounded-lg p-4 border border-white/10">
                                             <div className="text-xs text-slate-500 uppercase mb-1">Banka</div>
-                                            <div className="text-white font-medium">{siteSettings.bank_name}</div>
+                                            <div className="text-white font-medium">{activeEvent?.bank_name || 'Ziraat Bankası'}</div>
                                         </div>
                                         <div className="bg-slate-950/50 rounded-lg p-4 border border-white/10">
                                             <div className="text-xs text-slate-500 uppercase mb-1">Hesap Sahibi</div>
-                                            <div className="text-white font-medium">{siteSettings.account_holder}</div>
+                                            <div className="text-white font-medium">{activeEvent?.account_holder || 'Sporla Yalova Spor Kulübü'}</div>
                                         </div>
                                     </div>
 
                                     <div className="bg-slate-950/50 rounded-lg p-4 border border-white/10 mb-4">
                                         <div className="text-xs text-slate-500 uppercase mb-1">IBAN</div>
                                         <div className="text-emerald-400 font-mono font-medium text-lg">
-                                            {siteSettings.iban}
+                                            {activeEvent?.iban || 'TR00 0000 0000 0000 0000 0000 00'}
                                         </div>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="bg-cyan-500/10 rounded-lg p-4 border border-cyan-500/30 text-center">
                                             <div className="text-xs text-cyan-400 uppercase mb-1">Kısa Parkur</div>
-                                            <div className="text-2xl font-bold text-cyan-400">{siteSettings.short_price} TL</div>
+                                            <div className="text-2xl font-bold text-cyan-400">{shortPrice} TL</div>
                                         </div>
                                         <div className="bg-emerald-500/10 rounded-lg p-4 border border-emerald-500/30 text-center">
                                             <div className="text-xs text-emerald-400 uppercase mb-1">Uzun Parkur</div>
-                                            <div className="text-2xl font-bold text-emerald-400">{siteSettings.long_price} TL</div>
+                                            <div className="text-2xl font-bold text-emerald-400">{longPrice} TL</div>
                                         </div>
                                     </div>
 
@@ -597,7 +597,7 @@ export function ApplicationForm({ siteSettings, activeEvent }: ApplicationFormPr
                 </div>
             </div>
 
-            <Footer siteSettings={siteSettings} />
+            <Footer activeEvent={activeEvent} />
         </main>
     )
 }

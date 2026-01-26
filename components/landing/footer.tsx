@@ -1,14 +1,14 @@
 import { Bike } from "lucide-react";
 import Link from "next/link";
-import { SiteSettings } from "@/app/content-actions";
+import { Event } from "@/lib/supabase";
 
 interface FooterProps {
-    siteSettings?: SiteSettings
+    activeEvent?: Event | null
 }
 
-export function Footer({ siteSettings }: FooterProps) {
-    const email = siteSettings?.contact_email || "info@sporlayalova.com"
-    const phone = siteSettings?.contact_phone || "+90 (552) 196 16 77"
+export function Footer({ activeEvent }: FooterProps) {
+    const email = activeEvent?.contact_email || "info@sporlayalova.com"
+    const phone = activeEvent?.contact_phone || "+90 (552) 196 16 77"
 
     return (
         <footer className="bg-slate-950 text-slate-400 py-12 border-t border-slate-800 mt-auto">

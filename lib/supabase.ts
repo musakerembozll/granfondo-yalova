@@ -64,6 +64,17 @@ export interface Event {
     applications_open?: boolean
     short_price?: number
     long_price?: number
+    // Payment info (moved from site_settings)
+    bank_name?: string
+    account_holder?: string
+    iban?: string
+    // Contact info (moved from site_settings)
+    contact_email?: string
+    contact_phone?: string
+    // Video URL for hero section
+    hero_video_url?: string
+    // Theme preset (emerald, blue, orange, red, purple, cyan, rose, amber)
+    theme_preset?: string
     created_at: string
 }
 

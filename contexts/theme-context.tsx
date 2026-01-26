@@ -1,11 +1,11 @@
 "use client"
 
 import { createContext, useContext, ReactNode } from 'react'
-import { THEME_PRESETS, ThemePreset, getThemePreset } from '@/lib/theme-presets'
+import { THEME_PRESETS, ThemePreset, ThemePresetValue, getThemePreset } from '@/lib/theme-presets'
 
 type ThemeContextType = {
   preset: ThemePreset
-  theme: typeof THEME_PRESETS['emerald']
+  theme: ThemePresetValue
 }
 
 const ThemeContext = createContext<ThemeContextType>({

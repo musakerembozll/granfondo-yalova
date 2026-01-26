@@ -11,6 +11,9 @@ import { CosmicBackgroundWrapper } from '@/components/landing/cosmic-background-
 
 const inter = Inter({ subsets: ["latin"] });
 
+// Force dynamic rendering - no cache
+export const dynamic = 'force-dynamic';
+
 // Dynamic metadata based on active event
 export async function generateMetadata(): Promise<Metadata> {
   // Fetch active event

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Users, TrendingUp, Target, Waves, Bike } from "lucide-react"
 import { supabase, Event } from "@/lib/supabase"
-import { getThemeClasses } from "@/lib/theme-presets"
+import { getThemePreset } from "@/lib/theme-presets"
 
 interface ParticipantCounterProps {
     activeEvent?: Event | null
@@ -13,7 +13,7 @@ interface ParticipantCounterProps {
 export function ParticipantCounter({ activeEvent }: ParticipantCounterProps) {
     // Detect theme
     const themePreset = activeEvent?.theme_preset || 'emerald'
-    const theme = getThemeClasses(themePreset)
+    const theme = getThemePreset(themePreset)
     const isSwimming = activeEvent?.title?.toLowerCase().includes('yüzme') || 
                        activeEvent?.title?.toLowerCase().includes('swimming') ||
                        themePreset === 'blue'

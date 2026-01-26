@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Event } from "@/lib/supabase"
-import { getThemeClasses } from "@/lib/theme-presets"
+import { getThemePreset } from "@/lib/theme-presets"
 
 interface TimeLeft {
     days: number
@@ -20,7 +20,7 @@ interface CountdownTimerProps {
 export function CountdownTimer({ targetDate: targetDateProp = "2026-04-14", activeEvent }: CountdownTimerProps) {
     // Detect theme
     const themePreset = activeEvent?.theme_preset || 'emerald'
-    const theme = getThemeClasses(themePreset)
+    const theme = getThemePreset(themePreset)
     const isSwimming = activeEvent?.title?.toLowerCase().includes('yüzme') || 
                        activeEvent?.title?.toLowerCase().includes('swimming') ||
                        themePreset === 'blue'

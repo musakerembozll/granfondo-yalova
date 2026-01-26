@@ -3,9 +3,10 @@
 -- Date: 2025-01-26
 
 -- Step 1: Create news_comments table
+-- Note: news_id is TEXT to support both UUIDs from DB and string IDs from static content
 CREATE TABLE IF NOT EXISTS news_comments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    news_id UUID NOT NULL REFERENCES news(id) ON DELETE CASCADE,
+    news_id TEXT NOT NULL,
     full_name TEXT NOT NULL,
     email TEXT NOT NULL,
     content TEXT NOT NULL,
@@ -25,5 +26,5 @@ CREATE TRIGGER update_news_comments_updated_at
     EXECUTE FUNCTION update_updated_at_column();
 
 -- Step 4: Add comments for documentation
-COMMENT ON COLUMN news_comments.news_id IS 'Reference to the news/blog post';
+COMMENT ON COLUMN news_comments.news_id IS 'Reference to the news/blog post (ID or static string)';
 COMMENT ON COLUMN news_comments.is_approved IS 'Whether the comment has been approved by a moderator';

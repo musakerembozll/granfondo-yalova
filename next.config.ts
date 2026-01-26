@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://va.vercel-scripts.com",
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https://*.supabase.co https://www.sporlayalova.com",
+              "img-src 'self' data: blob: https://*.supabase.co https://www.sporlayalova.com https://images.unsplash.com",
               "font-src 'self' data:",
               "connect-src 'self' https://*.supabase.co https://vitals.vercel-insights.com",
               "frame-ancestors 'none'",

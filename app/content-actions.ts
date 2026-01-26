@@ -543,6 +543,41 @@ export async function deleteNews(id: string) {
     return { success: true }
 }
 
+export async function getNewsComments(newsId: string) {
+    const { data, error } = await supabase
+        .from('news_comments')
+        .select('*')
+        .eq('news_id', newsId)
+        .eq('is_approved', true)
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        // console.error('Get news comments error:', error)
+        // Return empty array if table doesn't exist yet
+        return []
+    }
+    return data || []
+}
+
+export async function addNewsComment(newsId: string, data: { fullName: string, email: string, content: string }) {
+    const { error } = await supabase
+        .from('news_comments')
+        .insert({
+            news_id: newsId,
+            full_name: data.fullName,
+            email: data.email,
+            content: data.content,
+            is_approved: false // Requires moderation
+        })
+
+    if (error) {
+        console.error('Add news comment error:', error)
+        return { success: false, message: error.message }
+    }
+
+    return { success: true }
+}
+
 // ============================================
 // ABOUT PAGE CONTENT
 // ============================================

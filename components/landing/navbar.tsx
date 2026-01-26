@@ -5,16 +5,32 @@ import Link from "next/link"
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Menu, X, Bike, User, LogOut, ChevronDown } from "lucide-react"
+import { Menu, X, Bike, User, LogOut, ChevronDown, Waves } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
+import { Event } from "@/lib/supabase"
+import { THEME_PRESETS } from "@/lib/theme-presets"
 
-export function Navbar() {
+interface NavbarProps {
+    activeEvent?: Event | null
+}
+
+export function Navbar({ activeEvent }: NavbarProps) {
     const { scrollY } = useScroll()
     const [isScrolled, setIsScrolled] = React.useState(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
     const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false)
 
     const { user, profile, loading, signOut } = useAuth()
+
+    // Tema rengini al
+    const themePreset = (activeEvent?.theme_preset || 'emerald') as keyof typeof THEME_PRESETS
+    const theme = THEME_PRESETS[themePreset] || THEME_PRESETS.emerald
+
+    // Site başlığı
+    const siteTitle = activeEvent?.site_title || 'GranFondo Yalova'
+
+    // Logo ikonu
+    const LogoIcon = themePreset === 'blue' ? Waves : Bike
 
     useMotionValueEvent(scrollY, "change", (latest) => {
         setIsScrolled(latest > 50)
@@ -47,9 +63,13 @@ export function Navbar() {
                 transition={{ duration: 0.5 }}
             >
                 <Link href="/" className="flex items-center gap-2 font-bold text-2xl tracking-tighter">
-                    <Bike className="h-8 w-8 text-emerald-500" />
+                    {activeEvent?.logo_url ? (
+                        <img src={activeEvent.logo_url} alt={siteTitle} className="h-8 w-auto" />
+                    ) : (
+                        <LogoIcon className="h-8 w-8" style={{ color: theme.primary }} />
+                    )}
                     <span className={cn("transition-colors", isScrolled ? "text-slate-900 dark:text-white" : "text-white")}>
-                        GranFondo Yalova
+                        {siteTitle}
                     </span>
                 </Link>
 
@@ -128,7 +148,11 @@ export function Navbar() {
                                 </Button>
                             </Link>
                             <Link href="/kayit">
-                                <Button size="lg" className="font-bold rounded-full bg-emerald-500 hover:bg-emerald-600">
+                                <Button 
+                                    size="lg" 
+                                    className="font-bold rounded-full text-white"
+                                    style={{ background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})` }}
+                                >
                                     Kayıt Ol
                                 </Button>
                             </Link>
@@ -188,7 +212,11 @@ export function Navbar() {
                                         </Button>
                                     </Link>
                                     <Link href="/kayit" onClick={() => setIsMobileMenuOpen(false)}>
-                                        <Button size="lg" className="font-bold rounded-full bg-emerald-500 hover:bg-emerald-600">
+                                        <Button 
+                                            size="lg" 
+                                            className="font-bold rounded-full text-white"
+                                            style={{ background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})` }}
+                                        >
                                             Kayıt Ol
                                         </Button>
                                     </Link>

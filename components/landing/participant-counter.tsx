@@ -2,10 +2,22 @@
 
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { Users, TrendingUp, Target } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { Users, TrendingUp, Target, Waves, Bike } from "lucide-react"
+import { supabase, Event } from "@/lib/supabase"
+import { getThemeClasses } from "@/lib/theme-presets"
 
-export function ParticipantCounter() {
+interface ParticipantCounterProps {
+    activeEvent?: Event | null
+}
+
+export function ParticipantCounter({ activeEvent }: ParticipantCounterProps) {
+    // Detect theme
+    const themePreset = activeEvent?.theme_preset || 'emerald'
+    const theme = getThemeClasses(themePreset)
+    const isSwimming = activeEvent?.title?.toLowerCase().includes('yüzme') || 
+                       activeEvent?.title?.toLowerCase().includes('swimming') ||
+                       themePreset === 'blue'
+    
     const [count, setCount] = useState(0)
     const [displayCount, setDisplayCount] = useState(0)
 
@@ -47,30 +59,34 @@ export function ParticipantCounter() {
 
     const stats = [
         {
-            icon: <Users className="h-6 w-6" />,
+            icon: isSwimming ? <Waves className="h-6 w-6" /> : <Users className="h-6 w-6" />,
             value: displayCount,
-            label: "Kayıtlı Sporcu",
+            label: isSwimming ? "Kayıtlı Yüzücü" : "Kayıtlı Sporcu",
             suffix: "",
-            color: "text-emerald-400"
+            color: isSwimming ? "text-blue-400" : "text-emerald-400"
         },
         {
             icon: <Target className="h-6 w-6" />,
-            value: 500,
+            value: isSwimming ? 200 : 500,
             label: "Hedef Katılımcı",
             suffix: "",
             color: "text-cyan-400"
         },
         {
             icon: <TrendingUp className="h-6 w-6" />,
-            value: Math.round((displayCount / 500) * 100),
+            value: Math.round((displayCount / (isSwimming ? 200 : 500)) * 100),
             label: "Doluluk Oranı",
             suffix: "%",
-            color: "text-yellow-400"
+            color: isSwimming ? "text-sky-400" : "text-yellow-400"
         }
     ]
 
     return (
-        <section className="py-16 bg-gradient-to-r from-emerald-900/20 via-slate-900 to-cyan-900/20 border-y border-white/5">
+        <section className={`py-16 border-y border-white/5 ${
+            isSwimming 
+                ? 'bg-gradient-to-r from-blue-900/20 via-slate-900 to-cyan-900/20' 
+                : 'bg-gradient-to-r from-emerald-900/20 via-slate-900 to-cyan-900/20'
+        }`}>
             <div className="container px-4 mx-auto max-w-4xl">
                 <motion.div
                     className="text-center mb-10"
@@ -78,11 +94,13 @@ export function ParticipantCounter() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                 >
-                    <h3 className="text-emerald-400 text-sm uppercase tracking-widest mb-2">
+                    <h3 className={`text-sm uppercase tracking-widest mb-2 ${
+                        isSwimming ? 'text-blue-400' : 'text-emerald-400'
+                    }`}>
                         Canlı İstatistikler
                     </h3>
                     <h2 className="text-2xl md:text-3xl font-bold text-white">
-                        Kayıtlar Devam Ediyor!
+                        {isSwimming ? 'Yüzme Kayıtları Devam Ediyor!' : 'Kayıtlar Devam Ediyor!'}
                     </h2>
                 </motion.div>
 

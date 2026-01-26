@@ -5,25 +5,41 @@ import { motion, useScroll, useTransform } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, ChevronDown } from "lucide-react"
 import { useState, useRef } from "react"
+import { Event } from "@/lib/supabase"
+import { THEME_PRESETS } from "@/lib/theme-presets"
 
 interface HeroSectionProps {
     eventDate?: string
+    title?: string
     subtitle?: string
     ctaText?: string
     videoUrl?: string
     imageUrl?: string
+    activeEvent?: Event | null
 }
 
 export function HeroSection({
     eventDate = "12 Eylül 2026",
+    title = "GRAN FONDO YALOVA 2026",
     subtitle = "Marmara'nın incisinde, eşsiz doğa ve zorlu parkurlarda pedallamaya hazır mısın? Sınırlarını zorla, efsaneye ortak ol.",
     ctaText = "Hemen Kayıt Ol",
     videoUrl = "https://videos.pexels.com/video-files/5793953/5793953-uhd_2560_1440_30fps.mp4",
-    imageUrl = "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=2070&auto=format&fit=crop"
+    imageUrl = "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=2070&auto=format&fit=crop",
+    activeEvent
 }: HeroSectionProps) {
     const [videoLoaded, setVideoLoaded] = useState(false)
     const [videoError, setVideoError] = useState(false)
     const sectionRef = useRef<HTMLElement>(null)
+
+    // Tema rengini al
+    const themePreset = (activeEvent?.theme_preset || 'emerald') as keyof typeof THEME_PRESETS
+    const theme = THEME_PRESETS[themePreset] || THEME_PRESETS.emerald
+
+    // Başlık parçalama (örn: "GRAN FONDO YALOVA 2026" -> ["GRAN FONDO", "YALOVA 2026"])
+    const titleParts = title.split(/\s+/)
+    const midPoint = Math.ceil(titleParts.length / 2)
+    const titleLine1 = titleParts.slice(0, midPoint).join(' ')
+    const titleLine2 = titleParts.slice(midPoint).join(' ')
 
     // Parallax effect
     const { scrollYProgress } = useScroll({
@@ -84,8 +100,11 @@ export function HeroSection({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, ease: "easeOut" }}
                 >
-                    <h2 className="text-xl md:text-2xl font-medium text-emerald-400 mb-4 tracking-widest uppercase">
-                        {eventDate} • Yalova
+                    <h2 
+                        className="text-xl md:text-2xl font-medium mb-4 tracking-widest uppercase"
+                        style={{ color: theme.primary }}
+                    >
+                        {eventDate} • {activeEvent?.location || 'Yalova'}
                     </h2>
                 </motion.div>
 
@@ -95,10 +114,15 @@ export function HeroSection({
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
                 >
-                    GRAN FONDO
+                    {titleLine1}
                     <br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-500 animate-gradient-x">
-                        YALOVA 2026
+                    <span 
+                        className="text-transparent bg-clip-text animate-gradient-x"
+                        style={{ 
+                            backgroundImage: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary}, ${theme.accent})`
+                        }}
+                    >
+                        {titleLine2}
                     </span>
                 </motion.h1>
 
@@ -120,7 +144,11 @@ export function HeroSection({
                     <Link href="/basvuru">
                         <Button
                             size="lg"
-                            className="group h-14 px-8 text-lg rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-[0_0_40px_-5px_theme(colors.emerald.500)] border-0 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_60px_-5px_theme(colors.emerald.400)]"
+                            className="group h-14 px-8 text-lg rounded-full text-white border-0 transition-all duration-300 hover:scale-105"
+                            style={{ 
+                                background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`,
+                                boxShadow: `0 0 40px -5px ${theme.primary}`
+                            }}
                         >
                             {ctaText}
                             <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
@@ -149,9 +177,13 @@ export function HeroSection({
             >
                 <div className="flex flex-col items-center gap-2">
                     <span className="text-xs text-white/50 uppercase tracking-wider">Keşfet</span>
-                    <div className="w-8 h-12 border-2 border-white/30 rounded-full flex justify-center p-2 hover:border-emerald-400/50 transition-colors">
+                    <div 
+                        className="w-8 h-12 border-2 rounded-full flex justify-center p-2 transition-colors"
+                        style={{ borderColor: `${theme.primary}50` }}
+                    >
                         <motion.div
-                            className="w-1.5 h-3 bg-white rounded-full"
+                            className="w-1.5 h-3 rounded-full"
+                            style={{ backgroundColor: theme.primary }}
                             animate={{ y: [0, 8, 0], opacity: [1, 0.5, 1] }}
                             transition={{ duration: 1.5, repeat: Infinity }}
                         />

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { ArrowLeft, Save, Loader2, Upload, Image as ImageIcon, Star, CreditCard, Phone, Palette, Video } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Upload, Image as ImageIcon, Star, CreditCard, Phone, Palette, Video, Globe, Type, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -51,6 +51,19 @@ export default function EditEventPage({ params }: PageProps) {
         contact_phone?: string;
         // Theme
         theme_preset?: string;
+        // Site Branding
+        site_title?: string;
+        site_subtitle?: string;
+        logo_url?: string;
+        favicon_url?: string;
+        // Hero Content
+        hero_title?: string;
+        hero_subtitle?: string;
+        hero_cta_text?: string;
+        // Info Section
+        info_title?: string;
+        info_subtitle?: string;
+        info_description?: string;
     } | null>(null);
 
     useEffect(() => {
@@ -112,6 +125,19 @@ export default function EditEventPage({ params }: PageProps) {
             contact_phone: formData.get("contact_phone") || "",
             // Theme
             theme_preset: formData.get("theme_preset") || "emerald",
+            // Site Branding
+            site_title: formData.get("site_title") || "",
+            site_subtitle: formData.get("site_subtitle") || "",
+            logo_url: event?.logo_url || "",
+            favicon_url: event?.favicon_url || "",
+            // Hero Content
+            hero_title: formData.get("hero_title") || "",
+            hero_subtitle: formData.get("hero_subtitle") || "",
+            hero_cta_text: formData.get("hero_cta_text") || "Hemen Başvur",
+            // Info Section
+            info_title: formData.get("info_title") || "",
+            info_subtitle: formData.get("info_subtitle") || "",
+            info_description: formData.get("info_description") || "",
         };
 
         try {
@@ -450,7 +476,234 @@ export default function EditEventPage({ params }: PageProps) {
                         </div>
                     </CardContent>
                 </Card>
+                {/* Site Branding */}
+                <Card className="bg-slate-900/50 border-white/10 backdrop-blur-sm">
+                    <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                            <Globe className="h-5 w-5 text-blue-400" />
+                            Site Markalaması
+                        </CardTitle>
+                        <CardDescription className="text-slate-400">
+                            Bu etkinlik aktif olduğunda site başlığı, logo ve favicon bu değerlere göre değişir
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="site_title" className="text-slate-300">Site Başlığı</Label>
+                                <Input
+                                    name="site_title"
+                                    id="site_title"
+                                    defaultValue={event.site_title || ""}
+                                    placeholder="GranFondo Yalova"
+                                    className="bg-slate-950 border-white/10 text-white"
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="site_subtitle" className="text-slate-300">Site Alt Başlığı</Label>
+                                <Input
+                                    name="site_subtitle"
+                                    id="site_subtitle"
+                                    defaultValue={event.site_subtitle || ""}
+                                    placeholder="Yalova'nın Kalbinde"
+                                    className="bg-slate-950 border-white/10 text-white"
+                                />
+                            </div>
+                        </div>
+                        <div className="grid gap-2">
+                            <Label className="text-slate-300">Logo URL</Label>
+                            <div className="flex gap-2">
+                                <Input
+                                    type="text"
+                                    value={event.logo_url || ""}
+                                    onChange={(e) => setEvent(prev => prev ? { ...prev, logo_url: e.target.value } : null)}
+                                    placeholder="https://... (Logo resmi)"
+                                    className="bg-slate-950 border-white/10 text-white"
+                                />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    id="logo-upload"
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            setUploading('logo_url');
+                                            const formData = new FormData();
+                                            formData.append('file', file);
+                                            formData.append('key', `event_${id}_logo`);
+                                            fetch('/api/admin/upload', { method: 'POST', body: formData })
+                                                .then(r => r.json())
+                                                .then(result => {
+                                                    if (result.url) {
+                                                        setEvent(prev => prev ? { ...prev, logo_url: result.url } : null);
+                                                        sonnerToast.success('Logo yüklendi');
+                                                    }
+                                                })
+                                                .catch(() => sonnerToast.error('Logo yükleme hatası'))
+                                                .finally(() => setUploading(null));
+                                        }
+                                    }}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => document.getElementById('logo-upload')?.click()}
+                                    disabled={uploading === 'logo_url'}
+                                    className="bg-slate-800 border-white/10"
+                                >
+                                    {uploading === 'logo_url' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                                </Button>
+                            </div>
+                            {event.logo_url && (
+                                <div className="mt-2 h-16 bg-slate-800 rounded p-2 inline-block">
+                                    <img src={event.logo_url} alt="Logo" className="h-full object-contain" />
+                                </div>
+                            )}
+                        </div>
+                        <div className="grid gap-2">
+                            <Label className="text-slate-300">Favicon URL</Label>
+                            <div className="flex gap-2">
+                                <Input
+                                    type="text"
+                                    value={event.favicon_url || ""}
+                                    onChange={(e) => setEvent(prev => prev ? { ...prev, favicon_url: e.target.value } : null)}
+                                    placeholder="https://... (32x32 veya 64x64 favicon)"
+                                    className="bg-slate-950 border-white/10 text-white"
+                                />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    id="favicon-upload"
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            setUploading('favicon_url');
+                                            const formData = new FormData();
+                                            formData.append('file', file);
+                                            formData.append('key', `event_${id}_favicon`);
+                                            fetch('/api/admin/upload', { method: 'POST', body: formData })
+                                                .then(r => r.json())
+                                                .then(result => {
+                                                    if (result.url) {
+                                                        setEvent(prev => prev ? { ...prev, favicon_url: result.url } : null);
+                                                        sonnerToast.success('Favicon yüklendi');
+                                                    }
+                                                })
+                                                .catch(() => sonnerToast.error('Favicon yükleme hatası'))
+                                                .finally(() => setUploading(null));
+                                        }
+                                    }}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => document.getElementById('favicon-upload')?.click()}
+                                    disabled={uploading === 'favicon_url'}
+                                    className="bg-slate-800 border-white/10"
+                                >
+                                    {uploading === 'favicon_url' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                                </Button>
+                            </div>
+                            {event.favicon_url && (
+                                <div className="mt-2 h-8 bg-slate-800 rounded p-1 inline-block">
+                                    <img src={event.favicon_url} alt="Favicon" className="h-full object-contain" />
+                                </div>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
 
+                {/* Hero Content */}
+                <Card className="bg-slate-900/50 border-white/10 backdrop-blur-sm">
+                    <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                            <Type className="h-5 w-5 text-pink-400" />
+                            Ana Sayfa Hero İçeriği
+                        </CardTitle>
+                        <CardDescription className="text-slate-400">
+                            Ana sayfanın en üstünde görünen başlık ve açıklama metinleri
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="hero_title" className="text-slate-300">Hero Başlığı</Label>
+                            <Input
+                                name="hero_title"
+                                id="hero_title"
+                                defaultValue={event.hero_title || ""}
+                                placeholder="GRAN FONDO YALOVA 2026"
+                                className="bg-slate-950 border-white/10 text-white text-lg font-bold"
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="hero_subtitle" className="text-slate-300">Hero Alt Başlığı</Label>
+                            <Textarea
+                                name="hero_subtitle"
+                                id="hero_subtitle"
+                                defaultValue={event.hero_subtitle || ""}
+                                placeholder="Marmara'nın incisinde, eşsiz doğa ve zorlu parkurlarda..."
+                                className="bg-slate-950 border-white/10 text-white min-h-[80px]"
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="hero_cta_text" className="text-slate-300">Buton Metni</Label>
+                            <Input
+                                name="hero_cta_text"
+                                id="hero_cta_text"
+                                defaultValue={event.hero_cta_text || "Hemen Başvur"}
+                                placeholder="Hemen Başvur"
+                                className="bg-slate-950 border-white/10 text-white max-w-xs"
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Info Section Content */}
+                <Card className="bg-slate-900/50 border-white/10 backdrop-blur-sm">
+                    <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                            <FileText className="h-5 w-5 text-orange-400" />
+                            Bilgi Bölümü İçeriği
+                        </CardTitle>
+                        <CardDescription className="text-slate-400">
+                            Ana sayfada etkinlik hakkında bilgi veren bölümün içeriği
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="info_title" className="text-slate-300">Başlık</Label>
+                            <Input
+                                name="info_title"
+                                id="info_title"
+                                defaultValue={event.info_title || ""}
+                                placeholder="Pedalların Gücü Doğayla Buluşuyor"
+                                className="bg-slate-950 border-white/10 text-white"
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="info_subtitle" className="text-slate-300">Alt Başlık</Label>
+                            <Input
+                                name="info_subtitle"
+                                id="info_subtitle"
+                                defaultValue={event.info_subtitle || ""}
+                                placeholder="GranFondo Yalova, sadece bir yarış değil..."
+                                className="bg-slate-950 border-white/10 text-white"
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="info_description" className="text-slate-300">Açıklama</Label>
+                            <Textarea
+                                name="info_description"
+                                id="info_description"
+                                defaultValue={event.info_description || ""}
+                                placeholder="Etkinlik hakkında detaylı açıklama..."
+                                className="bg-slate-950 border-white/10 text-white min-h-[100px]"
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
                 {/* Payment Info */}
                 <Card className="bg-slate-900/50 border-white/10 backdrop-blur-sm">
                     <CardHeader>

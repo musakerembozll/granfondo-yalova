@@ -46,4 +46,4 @@ SET
     contact_email = COALESCE((SELECT contact_email FROM site_settings LIMIT 1), 'info@granfondoyalova.com'),
     contact_phone = COALESCE((SELECT contact_phone FROM site_settings LIMIT 1), '+90 (552) 196 16 77'),
     theme_preset = 'emerald'
-WHERE is_active = true;
+WHERE active_event = true;

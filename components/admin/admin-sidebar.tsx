@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { LayoutDashboard, Calendar, Users, LogOut, Bike, BookOpen, Home, Building2, Settings, MessageSquare, Image, HelpCircle, MessageCircle, Layout, Newspaper, BarChart3, Mail, QrCode, Send, Trophy, Menu, X, UserCircle, Edit2 } from "lucide-react"
+import { LayoutDashboard, Calendar, Users, LogOut, Bike, BookOpen, Home, Building2, MessageSquare, Image, HelpCircle, MessageCircle, Layout, Newspaper, BarChart3, Mail, QrCode, Send, Trophy, Menu, X, UserCircle, Edit2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { logoutAdmin, AdminUser } from "@/app/admin/auth-actions"
@@ -123,12 +123,6 @@ const allNavItems = [
         path: "/admin/email-templates",
         name: "Email Şablonları",
         icon: Mail,
-        adminOnly: true,
-    },
-    {
-        path: "/admin/site-settings",
-        name: "Site Ayarları",
-        icon: Settings,
         adminOnly: true,
     },
     {

@@ -70,7 +70,7 @@ export default async function EtkinliklerPage() {
                                 >
                                     <div
                                         className="absolute inset-0 bg-cover bg-center opacity-20"
-                                        style={{ backgroundImage: `url(${activeEvent.background_image_url || FALLBACK_IMAGE})` }}
+                                        style={{ backgroundImage: `url(${activeEvent.background_image_url || activeEvent.photo_url || FALLBACK_IMAGE})` }}
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 to-slate-950/50" />
 
@@ -164,7 +164,7 @@ export default async function EtkinliklerPage() {
                                             >
                                                 <div
                                                     className="absolute inset-0 bg-cover bg-center opacity-30"
-                                                    style={{ backgroundImage: `url(${event.photo_url || FALLBACK_IMAGE})` }}
+                                                    style={{ backgroundImage: `url(${event.photo_url || event.background_image_url || FALLBACK_IMAGE})` }}
                                                 />
                                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent" />
 

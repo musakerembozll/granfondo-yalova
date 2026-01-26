@@ -26,9 +26,12 @@ interface Props {
 export function ParkurClient({ activeEvent }: Props) {
     const [activeRoute, setActiveRoute] = useState<"long" | "short">("long")
 
+    // Enhanced detection for swimming events
     const isSwimming = activeEvent?.title?.toLowerCase().includes("yüzme") ||
                        activeEvent?.title?.toLowerCase().includes("swimming") ||
-                       activeEvent?.theme_preset === 'blue';
+                       activeEvent?.description?.toLowerCase().includes("yüzme") ||
+                       activeEvent?.theme_preset === 'blue' ||
+                       activeEvent?.theme_preset === 'cyan';
 
     const cyclingRoutes = {
         long: {

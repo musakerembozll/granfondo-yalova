@@ -22,7 +22,7 @@ export default async function NewsDetailPage({ params }: Props) {
     }
 
     return (
-        <main className="min-h-screen bg-slate-950 text-white">
+        <main className="min-h-screen bg-slate-950 text-white relative z-10">
             <Navbar />
 
             <div className="pt-24 pb-16">

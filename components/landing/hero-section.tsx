@@ -23,13 +23,19 @@ export function HeroSection({
     title = "GRAN FONDO YALOVA 2026",
     subtitle = "Marmara'nın incisinde, eşsiz doğa ve zorlu parkurlarda pedallamaya hazır mısın? Sınırlarını zorla, efsaneye ortak ol.",
     ctaText = "Hemen Kayıt Ol",
-    videoUrl = "https://videos.pexels.com/video-files/5793953/5793953-uhd_2560_1440_30fps.mp4",
+    videoUrl,
     imageUrl = "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=2070&auto=format&fit=crop",
     activeEvent
 }: HeroSectionProps) {
+    const DEFAULT_VIDEO = "https://videos.pexels.com/video-files/5793953/5793953-uhd_2560_1440_30fps.mp4"
     const [videoLoaded, setVideoLoaded] = useState(false)
     const [videoError, setVideoError] = useState(false)
     const sectionRef = useRef<HTMLElement>(null)
+
+    // Determine effective video URL
+    // If videoUrl is passed as empty string, treat it as no video
+    // If videoUrl is undefined, use default
+    const effectiveVideoUrl = videoUrl === "" ? null : (videoUrl || DEFAULT_VIDEO)
 
     // Tema rengini al
     const themePreset = (activeEvent?.theme_preset || 'emerald') as keyof typeof THEME_PRESETS
@@ -52,7 +58,7 @@ export function HeroSection({
     const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
 
     // Show video if loaded successfully, show image if video failed or still loading
-    const showVideo = videoLoaded && !videoError
+    const showVideo = !!effectiveVideoUrl && videoLoaded && !videoError
 
     return (
         <section ref={sectionRef} className="relative h-screen flex items-center justify-center overflow-hidden">
@@ -62,7 +68,7 @@ export function HeroSection({
                 style={{ y: backgroundY }}
             >
                 {/* Video */}
-                {!videoError && (
+                {effectiveVideoUrl && !videoError && (
                     <video
                         autoPlay
                         muted
@@ -74,14 +80,14 @@ export function HeroSection({
                         onError={() => setVideoError(true)}
                         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${showVideo ? 'opacity-60' : 'opacity-0'}`}
                     >
-                        <source src={videoUrl} type="video/mp4" />
+                        <source src={effectiveVideoUrl} type="video/mp4" />
                     </video>
                 )}
 
-                {/* Fallback Image - only show if video fails, not while loading */}
-                {videoError && (
+                {/* Fallback Image - show if no video or video error or loading */}
+                {(!showVideo || videoError) && (
                     <div
-                        className="absolute inset-0 bg-cover bg-center opacity-60"
+                        className="absolute inset-0 bg-cover bg-center opacity-60 transition-opacity duration-500"
                         style={{ backgroundImage: `url('${imageUrl}')` }}
                     />
                 )}

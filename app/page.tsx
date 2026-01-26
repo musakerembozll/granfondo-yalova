@@ -31,8 +31,23 @@ export default async function Home() {
   // Use active event data
   const eventDate = activeEvent ? formatEventDate(activeEvent.date) : formatEventDate(siteSettings.event_date)
   const heroImageUrl = activeEvent?.background_image_url || images.hero_image
-  const defaultVideo = "https://videos.pexels.com/video-files/5793953/5793953-uhd_2560_1440_30fps.mp4"
-  const heroVideoUrl = activeEvent?.hero_video_url || (images.hero_video && images.hero_video.trim() !== '' ? images.hero_video : defaultVideo)
+
+  // Determine video URL logic:
+  // 1. If active event has a specific video, use it.
+  // 2. If active event has a specific image (but no video), use NO video (empty string) to show the image.
+  // 3. Use site settings video if available.
+  // 4. Fallback to undefined (component uses default)
+  let heroVideoUrl: string | undefined;
+
+  if (activeEvent?.hero_video_url) {
+    heroVideoUrl = activeEvent.hero_video_url;
+  } else if (activeEvent?.background_image_url) {
+    heroVideoUrl = ""; // Force image mode
+  } else if (images.hero_video && images.hero_video.trim() !== '') {
+    heroVideoUrl = images.hero_video;
+  } else {
+    heroVideoUrl = undefined; // Uses default video
+  }
   
   // Hero content from active event
   const heroTitle = activeEvent?.hero_title || activeEvent?.title || 'GRAN FONDO YALOVA 2026'

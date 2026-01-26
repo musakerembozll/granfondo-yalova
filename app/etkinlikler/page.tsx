@@ -1,7 +1,7 @@
 import { Navbar } from "@/components/landing/navbar";
 import { Footer } from "@/components/landing/footer";
 import { getEvents, getActiveEvent } from "@/app/actions";
-import { Calendar, MapPin, Users, ArrowRight, Star, Waves, Bike, Running } from "lucide-react";
+import { Calendar, MapPin, Users, ArrowRight, Star, Waves, Bike, Footprints } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { THEME_PRESETS } from "@/lib/theme-presets";
@@ -28,7 +28,7 @@ export default async function EtkinliklerPage() {
             return <Waves className="h-5 w-5" />;
         }
         if (preset === 'orange' || title.toLowerCase().includes('koşu')) {
-            return <Running className="h-5 w-5" />;
+            return <Footprints className="h-5 w-5" />;
         }
         return <Bike className="h-5 w-5" />;
     };

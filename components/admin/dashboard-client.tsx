@@ -34,11 +34,19 @@ interface DashboardClientProps {
         activeEvents: number;
         recentApplications: Application[];
         allApplications?: Application[];
+        totalIncome?: number;
     }
 }
 
 export function AdminDashboardClient({ stats }: DashboardClientProps) {
     const applications = stats.allApplications || stats.recentApplications.map(a => ({ ...a, status: 'pending' }));
+
+    // Format currency
+    const formattedIncome = new Intl.NumberFormat('tr-TR', {
+        style: 'currency',
+        currency: 'TRY',
+        maximumFractionDigits: 0
+    }).format(stats.totalIncome || 0);
 
     return (
         <motion.div
@@ -59,8 +67,8 @@ export function AdminDashboardClient({ stats }: DashboardClientProps) {
                 {[
                     { title: "Toplam Başvuru", value: stats.totalApplications.toString(), label: "Güncel Veri", icon: Users, color: "text-blue-400", bg: "bg-blue-500/10" },
                     { title: "Aktif Etkinlikler", value: stats.activeEvents.toString(), label: "Yayında", icon: Calendar, color: "text-emerald-400", bg: "bg-emerald-500/10" },
-                    { title: "Toplam Gelir", value: "₺0", label: "Henüz ödeme yok", icon: TrendingUp, color: "text-yellow-400", bg: "bg-yellow-500/10" },
-                    { title: "Sistem Durumu", value: "%100", label: "Tüm servisler aktif", icon: Activity, color: "text-purple-400", bg: "bg-purple-500/10" },
+                    { title: "Toplam Tahmini Gelir", value: formattedIncome, label: "Onaylı Başvurular", icon: TrendingUp, color: "text-yellow-400", bg: "bg-yellow-500/10" },
+                    { title: "Sistem Durumu", value: "Aktif", label: "Çevrimiçi", icon: Activity, color: "text-purple-400", bg: "bg-purple-500/10" },
                 ].map((stat) => {
                     const Icon = stat.icon;
                     return (

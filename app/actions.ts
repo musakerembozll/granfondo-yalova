@@ -223,6 +223,22 @@ export async function getDashboardStats() {
         .from('events')
         .select('*')
 
+    const activeEvent = events?.find(e => e.active_event);
+
+    // Calculate income based on active event prices and approved applications
+    let totalIncome = 0;
+    if (activeEvent && applications) {
+        const shortPrice = activeEvent.short_price || 0;
+        const longPrice = activeEvent.long_price || 0;
+
+        applications.forEach(app => {
+            if (app.status === 'approved') {
+                if (app.category === 'short') totalIncome += shortPrice;
+                if (app.category === 'long') totalIncome += longPrice;
+            }
+        });
+    }
+
     const totalApplications = applications?.length || 0
     const activeEvents = events?.filter(e => e.status === 'published').length || 0
     const recentApplications = (applications || []).slice(0, 5).map(app => {
@@ -260,7 +276,8 @@ export async function getDashboardStats() {
         activeEvents,
         recentApplications,
         allApplications,
-        events: events || []
+        events: events || [],
+        totalIncome
     }
 }
 

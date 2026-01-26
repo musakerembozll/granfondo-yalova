@@ -144,7 +144,36 @@ export const EventSchema = z.object({
     theme_color: z.string().optional(),
     applications_open: z.boolean().optional(),
     short_price: z.number().min(0, 'Fiyat negatif olamaz').optional(),
-    long_price: z.number().min(0, 'Fiyat negatif olamaz').optional()
+    long_price: z.number().min(0, 'Fiyat negatif olamaz').optional(),
+    
+    // Payment fields
+    bank_name: z.string().max(100).optional().or(z.literal('')),
+    account_holder: z.string().max(100).optional().or(z.literal('')),
+    iban: z.string().max(50).optional().or(z.literal('')),
+    
+    // Contact fields
+    contact_email: z.string().email().optional().or(z.literal('')),
+    contact_phone: z.string().max(20).optional().or(z.literal('')),
+    
+    // Theme
+    theme_preset: z.string().optional().or(z.literal('')),
+    hero_video_url: z.string().url().optional().or(z.literal('')),
+    
+    // Site Branding
+    site_title: z.string().max(200).optional().or(z.literal('')),
+    site_subtitle: z.string().max(300).optional().or(z.literal('')),
+    logo_url: z.string().url().optional().or(z.literal('')),
+    favicon_url: z.string().url().optional().or(z.literal('')),
+    
+    // Hero Content
+    hero_title: z.string().max(200).optional().or(z.literal('')),
+    hero_subtitle: z.string().max(500).optional().or(z.literal('')),
+    hero_cta_text: z.string().max(50).optional().or(z.literal('')),
+    
+    // Info Section
+    info_title: z.string().max(200).optional().or(z.literal('')),
+    info_subtitle: z.string().max(300).optional().or(z.literal('')),
+    info_description: z.string().max(1000).optional().or(z.literal(''))
 })
 
 export type EventInput = z.infer<typeof EventSchema>

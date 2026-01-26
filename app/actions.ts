@@ -166,6 +166,35 @@ export async function updateEvent(id: string, data: unknown) {
     if (typedData.applications_open !== undefined) updateData.applications_open = typedData.applications_open
     if (typedData.short_price !== undefined) updateData.short_price = typedData.short_price || null
     if (typedData.long_price !== undefined) updateData.long_price = typedData.long_price || null
+    
+    // Payment fields
+    if (typedData.bank_name !== undefined) updateData.bank_name = typedData.bank_name || null
+    if (typedData.account_holder !== undefined) updateData.account_holder = typedData.account_holder || null
+    if (typedData.iban !== undefined) updateData.iban = typedData.iban || null
+    
+    // Contact fields
+    if (typedData.contact_email !== undefined) updateData.contact_email = typedData.contact_email || null
+    if (typedData.contact_phone !== undefined) updateData.contact_phone = typedData.contact_phone || null
+    
+    // Theme & Video
+    if (typedData.theme_preset !== undefined) updateData.theme_preset = typedData.theme_preset || null
+    if (typedData.hero_video_url !== undefined) updateData.hero_video_url = typedData.hero_video_url || null
+    
+    // Site Branding
+    if (typedData.site_title !== undefined) updateData.site_title = typedData.site_title || null
+    if (typedData.site_subtitle !== undefined) updateData.site_subtitle = typedData.site_subtitle || null
+    if (typedData.logo_url !== undefined) updateData.logo_url = typedData.logo_url || null
+    if (typedData.favicon_url !== undefined) updateData.favicon_url = typedData.favicon_url || null
+    
+    // Hero Content
+    if (typedData.hero_title !== undefined) updateData.hero_title = typedData.hero_title || null
+    if (typedData.hero_subtitle !== undefined) updateData.hero_subtitle = typedData.hero_subtitle || null
+    if (typedData.hero_cta_text !== undefined) updateData.hero_cta_text = typedData.hero_cta_text || null
+    
+    // Info Section
+    if (typedData.info_title !== undefined) updateData.info_title = typedData.info_title || null
+    if (typedData.info_subtitle !== undefined) updateData.info_subtitle = typedData.info_subtitle || null
+    if (typedData.info_description !== undefined) updateData.info_description = typedData.info_description || null
 
     const { error } = await supabase
         .from('events')

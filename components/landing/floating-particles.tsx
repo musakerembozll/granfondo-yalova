@@ -74,14 +74,13 @@ export function FloatingParticles({
     if (!ctx) return
 
     const handleMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect()
       mouseRef.current = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
+        x: e.clientX,
+        y: e.clientY
       }
     }
 
-    canvas.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mousemove', handleMouseMove)
 
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -136,7 +135,7 @@ export function FloatingParticles({
     animate()
 
     return () => {
-      canvas.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mousemove', handleMouseMove)
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current)
       }
@@ -146,7 +145,7 @@ export function FloatingParticles({
   return (
     <canvas
       ref={canvasRef}
-      className={`absolute inset-0 pointer-events-auto ${className}`}
+      className={`absolute inset-0 pointer-events-none ${className}`}
       style={{ width: '100%', height: '100%' }}
     />
   )

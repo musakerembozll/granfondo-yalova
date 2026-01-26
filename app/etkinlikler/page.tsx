@@ -6,6 +6,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { THEME_PRESETS } from "@/lib/theme-presets";
 
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=1200";
+
 export default async function EtkinliklerPage() {
     const events = await getEvents();
     const activeEvent = await getActiveEvent();
@@ -66,12 +68,10 @@ export default async function EtkinliklerPage() {
                                         borderWidth: '1px'
                                     }}
                                 >
-                                    {activeEvent.background_image_url && (
-                                        <div 
-                                            className="absolute inset-0 bg-cover bg-center opacity-20" 
-                                            style={{ backgroundImage: `url(${activeEvent.background_image_url})` }}
-                                        />
-                                    )}
+                                    <div
+                                        className="absolute inset-0 bg-cover bg-center opacity-20"
+                                        style={{ backgroundImage: `url(${activeEvent.background_image_url || FALLBACK_IMAGE})` }}
+                                    />
                                     <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 to-slate-950/50" />
 
                                     <div className="relative p-8 md:p-12 grid md:grid-cols-2 gap-8 items-center">
@@ -162,12 +162,10 @@ export default async function EtkinliklerPage() {
                                                     background: `linear-gradient(135deg, ${theme.primary}30, rgba(15, 23, 42, 0.9))`
                                                 }}
                                             >
-                                                {event.photo_url && (
-                                                    <div 
-                                                        className="absolute inset-0 bg-cover bg-center opacity-30" 
-                                                        style={{ backgroundImage: `url(${event.photo_url})` }}
-                                                    />
-                                                )}
+                                                <div
+                                                    className="absolute inset-0 bg-cover bg-center opacity-30"
+                                                    style={{ backgroundImage: `url(${event.photo_url || FALLBACK_IMAGE})` }}
+                                                />
                                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent" />
 
                                                 <div 

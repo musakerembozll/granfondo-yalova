@@ -90,13 +90,13 @@ const allNavItems = [
     },
     {
         path: "/admin/testimonials",
-        name: "Yorumlar",
+        name: "Referanslar",
         icon: MessageCircle,
         adminOnly: true,
     },
     {
         path: "/admin/sections",
-        name: "Bölümler",
+        name: "Sayfa Düzenleyici",
         icon: Layout,
         adminOnly: true,
     },
@@ -104,6 +104,12 @@ const allNavItems = [
         path: "/admin/news",
         name: "Haberler",
         icon: Newspaper,
+        adminOnly: true,
+    },
+    {
+        path: "/admin/comments",
+        name: "Yorum Moderasyonu",
+        icon: MessageCircle,
         adminOnly: true,
     },
     // System

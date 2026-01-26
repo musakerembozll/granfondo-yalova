@@ -13,13 +13,7 @@ import { UnifiedMediaManager } from "@/components/admin/unified-media-manager"
 
 const defaultSettings: SiteSettings = {
     event_date: "2026-04-14",
-    short_price: 500,
-    long_price: 750,
-    iban: "TR12 0001 0012 3456 7890 1234 56",
-    bank_name: "Ziraat Bankası",
-    account_holder: "GranFondo Yalova Spor Kulübü",
-    contact_email: "info@granfondoyalova.com",
-    contact_phone: "+90 226 123 45 67"
+    hero_image_url: "/images/hero-image.jpg"
 }
 
 export function SiteSettingsManager() {
@@ -63,12 +57,12 @@ export function SiteSettingsManager() {
 
     return (
         <Tabs defaultValue="media" className="w-full">
-            <TabsList className="grid w-full max-w-md grid-cols-2 bg-slate-800/50">
-                <TabsTrigger value="media" className="data-[state=active]:bg-emerald-500">
+            <TabsList className="grid w-full max-w-md grid-cols-2 bg-slate-800/80 border border-white/10">
+                <TabsTrigger value="media" className="text-white data-[state=active]:bg-emerald-500 data-[state=active]:text-white">
                     <ImageIcon className="h-4 w-4 mr-2" />
                     Medya Yönetimi
                 </TabsTrigger>
-                <TabsTrigger value="settings" className="data-[state=active]:bg-emerald-500">
+                <TabsTrigger value="settings" className="text-white data-[state=active]:bg-emerald-500 data-[state=active]:text-white">
                     <Settings className="h-4 w-4 mr-2" />
                     Site Ayarları
                 </TabsTrigger>
@@ -86,6 +80,17 @@ export function SiteSettingsManager() {
                         <p className="text-emerald-400 font-medium">Dinamik Ayarlar</p>
                         <p className="text-slate-400 text-sm">
                             Bu ayarları değiştirdiğinizde sitedeki ilgili bilgiler otomatik olarak güncellenir.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Medya İpucu */}
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex items-start gap-3">
+                    <ImageIcon className="h-5 w-5 text-blue-400 mt-0.5" />
+                    <div>
+                        <p className="text-blue-300 font-medium">Görseller için Medya Yönetimi&apos;ni Kullanın</p>
+                        <p className="text-blue-400 text-sm">
+                            Ana sayfa resmi, logo ve arkaplanlar için &quot;Medya Yönetimi&quot; sekmesine geçin.
                         </p>
                     </div>
                 </div>
@@ -109,76 +114,17 @@ export function SiteSettingsManager() {
             </Card>
 
             {/* Bilgilendirme */}
-            <Card className="bg-blue-500/10 border-blue-500/20">
+            <Card className="bg-amber-500/10 border-amber-500/20">
                 <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                        <Info className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
+                        <Info className="h-5 w-5 text-amber-400 mt-0.5 flex-shrink-0" />
                         <div>
-                            <p className="text-blue-300 font-medium mb-1">Fiyatlandırma Artık Etkinliklerde!</p>
-                            <p className="text-blue-400 text-sm">
-                                Fiyatlandırma ayarları artık <strong>Etkinlikler</strong> bölümünden yönetiliyor. 
-                                Her etkinlik için ayrı fiyat belirleyebilirsiniz.
+                            <p className="text-amber-300 font-medium mb-1">Ayarlar Artık Etkinliklerde!</p>
+                            <p className="text-amber-400 text-sm">
+                                Ödeme bilgileri, iletişim, video ve tema rengi artık <strong>Etkinlikler</strong> bölümünden yönetiliyor. 
+                                Her etkinlik için ayrı ayarlar yapabilirsiniz. Ana sayfa aktif etkinliğin ayarlarını gösterir.
                             </p>
                         </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Ödeme Bilgileri */}
-            <Card className="bg-slate-900/50 border-white/5">
-                <CardHeader>
-                    <CardTitle className="text-white">Ödeme Bilgileri</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div>
-                        <label className="text-sm text-slate-400 block mb-2">Banka Adı</label>
-                        <Input
-                            value={settings.bank_name}
-                            onChange={(e) => setSettings({ ...settings, bank_name: e.target.value })}
-                            className="bg-slate-800 border-white/10 text-white"
-                        />
-                    </div>
-                    <div>
-                        <label className="text-sm text-slate-400 block mb-2">Hesap Sahibi</label>
-                        <Input
-                            value={settings.account_holder}
-                            onChange={(e) => setSettings({ ...settings, account_holder: e.target.value })}
-                            className="bg-slate-800 border-white/10 text-white"
-                        />
-                    </div>
-                    <div>
-                        <label className="text-sm text-slate-400 block mb-2">IBAN</label>
-                        <Input
-                            value={settings.iban}
-                            onChange={(e) => setSettings({ ...settings, iban: e.target.value })}
-                            className="bg-slate-800 border-white/10 text-white font-mono"
-                        />
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* İletişim */}
-            <Card className="bg-slate-900/50 border-white/5">
-                <CardHeader>
-                    <CardTitle className="text-white">İletişim Bilgileri</CardTitle>
-                </CardHeader>
-                <CardContent className="grid md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="text-sm text-slate-400 block mb-2">E-posta</label>
-                        <Input
-                            type="email"
-                            value={settings.contact_email}
-                            onChange={(e) => setSettings({ ...settings, contact_email: e.target.value })}
-                            className="bg-slate-800 border-white/10 text-white"
-                        />
-                    </div>
-                    <div>
-                        <label className="text-sm text-slate-400 block mb-2">Telefon</label>
-                        <Input
-                            value={settings.contact_phone}
-                            onChange={(e) => setSettings({ ...settings, contact_phone: e.target.value })}
-                            className="bg-slate-800 border-white/10 text-white"
-                        />
                     </div>
                 </CardContent>
             </Card>

@@ -137,15 +137,15 @@ export function EmailTemplateManager() {
                 <div className="lg:col-span-3 space-y-4">
                     <Tabs defaultValue="edit" onValueChange={(v) => setViewMode(v as 'edit' | 'preview')}>
                         <div className="flex items-center justify-between mb-4">
-                            <TabsList className="bg-slate-800">
-                                <TabsTrigger value="edit" className="data-[state=active]:bg-emerald-500">
+                            <TabsList className="bg-slate-800 border border-white/10">
+                                <TabsTrigger value="edit" className="text-white data-[state=active]:bg-emerald-500 data-[state=active]:text-white">
                                     <Code className="h-4 w-4 mr-2" /> Düzenle
                                 </TabsTrigger>
-                                <TabsTrigger value="preview" className="data-[state=active]:bg-emerald-500">
+                                <TabsTrigger value="preview" className="text-white data-[state=active]:bg-emerald-500 data-[state=active]:text-white">
                                     <Eye className="h-4 w-4 mr-2" /> Önizleme
                                 </TabsTrigger>
                             </TabsList>
-                            <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <div className="flex items-center gap-2 text-xs text-slate-400">
                                 <AlertCircle className="h-3 w-3" />
                                 Değişkenler: {activeTemplate.variables.map(v => `{{${v}}}`).join(', ')}
                             </div>

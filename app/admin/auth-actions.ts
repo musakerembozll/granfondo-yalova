@@ -87,7 +87,7 @@ export async function loginAdmin(username: string, password: string) {
 export async function logoutAdmin() {
     const cookieStore = await cookies()
     cookieStore.delete('admin_session')
-    redirect('/login')
+    redirect('/admin/login')
 }
 
 export async function getAdminSession(): Promise<AdminUser | null> {

@@ -57,12 +57,6 @@ export default function ProfilePage() {
         }
     }, [profile])
 
-    useEffect(() => {
-        if (user) {
-            fetchApplications()
-        }
-    }, [user])
-
     const fetchApplications = async () => {
         if (!user) return
 
@@ -77,6 +71,12 @@ export default function ProfilePage() {
         }
         setLoadingApps(false)
     }
+
+    useEffect(() => {
+        if (user) {
+            fetchApplications()
+        }
+    }, [user])
 
     const handleSave = async () => {
         setSaving(true)

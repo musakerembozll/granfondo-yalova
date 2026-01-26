@@ -10,24 +10,12 @@ import { revalidatePath } from "next/cache"
 export interface SiteSettings {
     id?: string
     event_date: string
-    short_price: number
-    long_price: number
-    iban: string
-    bank_name: string
-    account_holder: string
-    contact_email: string
-    contact_phone: string
+    hero_image_url?: string
 }
 
 const defaultSiteSettings: SiteSettings = {
     event_date: "2026-09-12",
-    short_price: 500,
-    long_price: 750,
-    iban: "TR12 0001 0012 3456 7890 1234 56",
-    bank_name: "Ziraat Bankası",
-    account_holder: "GranFondo Yalova Spor Kulübü",
-    contact_email: "info@granfondoyalova.com",
-    contact_phone: "+90 226 123 45 67"
+    hero_image_url: "/images/hero-image.jpg"
 }
 
 export async function getSiteSettings(): Promise<SiteSettings> {
@@ -420,6 +408,7 @@ export async function getNews(limit?: number) {
         .from('news')
         .select('*')
         .eq('is_published', true)
+        .not('published_at', 'is', null) // Ensure published_at is set
         .order('published_at', { ascending: false })
 
     if (limit) {
@@ -609,4 +598,95 @@ export async function updateAboutPageContent(contentType: 'story' | 'stats' | 'v
     return { success: true }
 }
 
+// ============================================
+// BLOG COMMENTS
+// ============================================
 
+export async function getNewsComments(newsId: string, approved: boolean = true) {
+    let query = supabase
+        .from('blog_comments')
+        .select('id, author_name, content, created_at')
+        .eq('news_id', newsId)
+        .order('created_at', { ascending: false })
+
+    if (approved) {
+        query = query.eq('is_approved', true)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+        console.error('Get news comments error:', error)
+        return []
+    }
+    return data || []
+}
+
+export async function addNewsComment(newsId: string, comment: {
+    author_name: string
+    author_email: string
+    content: string
+}) {
+    const { error } = await supabase
+        .from('blog_comments')
+        .insert({
+            news_id: newsId,
+            author_name: comment.author_name,
+            author_email: comment.author_email,
+            content: comment.content,
+            is_approved: false // Require moderation
+        })
+
+    if (error) {
+        console.error('Add news comment error:', error)
+        return { success: false, message: error.message }
+    }
+
+    revalidatePath(`/haberler`)
+    return { success: true, message: 'Yorumunuz gönderildi ve incelenmek üzere bekleniyor.' }
+}
+
+export async function getAllNewsComments() {
+    const { data, error } = await supabase
+        .from('blog_comments')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        console.error('Get all news comments error:', error)
+        return []
+    }
+    return data || []
+}
+
+export async function approveNewsComment(commentId: string) {
+    const { error } = await supabase
+        .from('blog_comments')
+        .update({ is_approved: true })
+        .eq('id', commentId)
+
+    if (error) {
+        console.error('Approve comment error:', error)
+        return { success: false }
+    }
+
+    revalidatePath("/haberler")
+    revalidatePath("/admin/messages")
+    return { success: true }
+}
+
+export async function deleteNewsComment(commentId: string) {
+    const { error } = await supabase
+        .from('blog_comments')
+        .delete()
+        .eq('id', commentId)
+
+    if (error) {
+        console.error('Delete comment error:', error)
+        return { success: false }
+    }
+
+    revalidatePath("/haberler")
+    revalidatePath("/admin/messages")
+    return { success: true }
+}

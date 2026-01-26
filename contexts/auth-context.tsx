@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { User, Session } from '@supabase/supabase-js'
+import { User, Session, AuthChangeEvent } from '@supabase/supabase-js'
 import { createSupabaseBrowserClient, UserProfile } from '@/lib/supabase'
 
 interface AuthContextType {
@@ -31,18 +31,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         // Get initial session
-        supabase.auth.getSession().then(({ data: { session } }) => {
+        const getInitialSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession()
             setSession(session)
             setUser(session?.user ?? null)
             if (session?.user) {
                 fetchProfile(session.user.id)
             }
             setLoading(false)
-        })
+        }
+        getInitialSession()
 
         // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event, session) => {
+            async (event: AuthChangeEvent, session: Session | null) => {
                 setSession(session)
                 setUser(session?.user ?? null)
                 if (session?.user) {
@@ -76,33 +78,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             options: {
                 emailRedirectTo: `${window.location.origin}/giris`,
                 data: {
-                    full_name: profileData.full_name
+                    full_name: profileData.full_name,
+                    phone: profileData.phone,
+                    gender: profileData.gender,
+                    birth_date: profileData.birth_date
                 }
             }
         })
 
         if (error) {
             return { success: false, message: error.message }
-        }
-
-        if (data.user) {
-            // Create user profile with email - use upsert to handle RLS issues
-            const { error: profileError } = await supabase
-                .from('user_profiles')
-                .upsert({
-                    id: data.user.id,
-                    email: email,
-                    full_name: profileData.full_name || '',
-                    phone: profileData.phone || null,
-                    gender: profileData.gender || null,
-                    birth_date: profileData.birth_date || null,
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                }, { onConflict: 'id' })
-
-            if (profileError) {
-                console.error('Profile creation error:', profileError)
-            }
         }
 
         return { success: true, message: 'Kayıt başarılı! E-posta adresinizi kontrol edin.' }
@@ -126,10 +111,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // OAuth providers
     const signInWithGoogle = async () => {
+        // Use fixed URL to prevent www/non-www mismatch
+        const redirectUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+            ? `${window.location.origin}/auth/callback`
+            : 'https://www.sporlayalova.com/auth/callback'
+        
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: `${window.location.origin}/auth/callback`
+                redirectTo: redirectUrl,
+                queryParams: {
+                    access_type: 'offline',
+                    prompt: 'consent'
+                }
             }
         })
         if (error) return { success: false, message: error.message }
@@ -137,10 +131,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const signInWithMicrosoft = async () => {
+        const redirectUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+            ? `${window.location.origin}/auth/callback`
+            : 'https://www.sporlayalova.com/auth/callback'
+            
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'azure',
             options: {
-                redirectTo: `${window.location.origin}/auth/callback`,
+                redirectTo: redirectUrl,
                 scopes: 'email profile'
             }
         })

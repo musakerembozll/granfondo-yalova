@@ -61,6 +61,9 @@ export const metadata: Metadata = {
   }
 };
 
+import { Analytics } from '@vercel/analytics/next';
+import { CosmicBackgroundWrapper } from '@/components/landing/cosmic-background-wrapper';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -69,12 +72,14 @@ export default function RootLayout({
   return (
     <html lang="tr">
       <body className={`${inter.className} antialiased`}>
+        <CosmicBackgroundWrapper />
         <AuthProvider>
           {children}
         </AuthProvider>
         <Toaster />
         <SonnerToaster position="top-center" richColors />
         <CookieConsent />
+        <Analytics />
       </body>
     </html>
   );

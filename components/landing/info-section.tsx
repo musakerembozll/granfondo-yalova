@@ -5,6 +5,8 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Trophy, Mountain, Users } from "lucide-react"
 import { useCountAnimation } from "@/hooks/use-count-animation"
+import { useState, useEffect } from "react"
+import { supabase } from "@/lib/supabase"
 
 function AnimatedStat({ value, suffix = '', color }: { value: number; suffix?: string; color: string }) {
     const { ref, displayValue } = useCountAnimation({
@@ -21,6 +23,38 @@ function AnimatedStat({ value, suffix = '', color }: { value: number; suffix?: s
 }
 
 export function InfoSection() {
+    // Varsayılan güzel bisiklet yarışı resmi
+    const defaultHeroImage = 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=800&h=1000&fit=crop&q=80'
+    const [heroImageUrl, setHeroImageUrl] = useState(defaultHeroImage)
+
+    useEffect(() => {
+        const fetchHeroImage = async () => {
+            // Önce site_images'dan hero_image'i dene
+            const { data: imageData } = await supabase
+                .from('site_images')
+                .select('url')
+                .eq('key', 'hero_image')
+                .single()
+            
+            if (imageData?.url) {
+                setHeroImageUrl(imageData.url)
+                return
+            }
+            
+            // Yoksa site_settings'den dene
+            const { data: settingsData } = await supabase
+                .from('site_settings')
+                .select('hero_image_url')
+                .single()
+            
+            if (settingsData?.hero_image_url) {
+                setHeroImageUrl(settingsData.hero_image_url)
+            }
+        }
+        
+        fetchHeroImage()
+    }, [])
+
     const features = [
         {
             icon: <Mountain className="h-6 w-6 text-emerald-400" />,
@@ -108,12 +142,15 @@ export function InfoSection() {
                             transition={{ type: "spring", stiffness: 300, damping: 20 }}
                         >
                             <div className="aspect-[4/5] bg-slate-700 relative">
-                                {/* Placeholder for About Image */}
-                                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1559348349-86f1f65817fe?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent" />
+                                {/* Dynamic Hero Image */}
+                                <div 
+                                    className="absolute inset-0 bg-cover bg-center transition-all duration-300"
+                                    style={{ backgroundImage: `url('${heroImageUrl}')` }}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                                 <div className="absolute bottom-8 left-8 right-8">
-                                    <div className="text-4xl font-bold text-white">#GFY2026</div>
-                                    <div className="text-white/80">Yalova&apos;nın Kalbinde</div>
+                                    <div className="text-4xl font-bold text-white drop-shadow-lg">#GFY2026</div>
+                                    <div className="text-white/90 drop-shadow-md font-medium">Yalova&apos;nın Kalbinde</div>
                                 </div>
                             </div>
                         </motion.div>

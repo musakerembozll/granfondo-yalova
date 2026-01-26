@@ -7,10 +7,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Upload, Image as ImageIcon, Video, Globe, Copy,
-  Check, Loader2, ExternalLink, RefreshCw, Film, FileImage, Settings as SettingsIcon
+  Check, Loader2, ExternalLink, RefreshCw, Film, Settings as SettingsIcon, Search, X
 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
+
+// Unsplash arama için önceden hazırlanmış görseller (API key gerektirmez)
+const PRESET_IMAGES = {
+  cycling: [
+    { url: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=1600&h=900&fit=crop', label: 'Bisiklet yarışı' },
+    { url: 'https://images.unsplash.com/photo-1541625602330-2277a4c46182?w=1600&h=900&fit=crop', label: 'Dağ bisikleti' },
+    { url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&h=900&fit=crop', label: 'Yol bisikleti' },
+    { url: 'https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?w=1600&h=900&fit=crop', label: 'Bisiklet grubu' },
+    { url: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=1600&h=900&fit=crop', label: 'Bisiklet detay' },
+    { url: 'https://images.unsplash.com/photo-1697951950160-6b6dcdb16f67?w=1600&h=900&fit=crop', label: 'Bisiklet tekerlek' },
+  ],
+  nature: [
+    { url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&h=900&fit=crop', label: 'Dağ manzarası' },
+    { url: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1600&h=900&fit=crop', label: 'Yeşil doğa' },
+    { url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1600&h=900&fit=crop', label: 'Orman yolu' },
+    { url: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=1600&h=900&fit=crop', label: 'Koşu' },
+  ]
+}
 
 interface MediaItem {
   key: string
@@ -83,41 +101,6 @@ const mediaCategories = [
         alt_text: 'OG Image'
       }
     ]
-  },
-  {
-    id: 'page',
-    name: 'Sayfa Arkaplanları',
-    icon: FileImage,
-    description: 'Hakkında, Parkur ve diğer sayfa arkaplanları',
-    items: [
-      {
-        key: 'about_bg',
-        label: 'Hakkında Arka Plan',
-        category: 'page' as const,
-        recommended: '1920x1080 veya daha büyük',
-        placeholder: 'https://images.unsplash.com/...',
-        url: '',
-        alt_text: 'About Background'
-      },
-      {
-        key: 'parkur_bg',
-        label: 'Parkur Arka Plan',
-        category: 'page' as const,
-        recommended: '1920x1080 veya daha büyük',
-        placeholder: 'https://images.unsplash.com/...',
-        url: '',
-        alt_text: 'Parkur Background'
-      },
-      {
-        key: 'contact_bg',
-        label: 'İletişim Arka Plan',
-        category: 'page' as const,
-        recommended: '1920x1080 veya daha büyük',
-        placeholder: 'https://images.unsplash.com/...',
-        url: '',
-        alt_text: 'Contact Background'
-      }
-    ]
   }
 ]
 
@@ -127,7 +110,17 @@ export function UnifiedMediaManager() {
   const [saving, setSaving] = useState<string | null>(null)
   const [uploading, setUploading] = useState<string | null>(null)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
+  const [showGallery, setShowGallery] = useState<string | null>(null) // key of item to show gallery for
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
+
+  // Galeriden resim seç
+  const handleSelectFromGallery = (key: string, url: string) => {
+    setMediaItems(prev => prev.map(item =>
+      item.key === key ? { ...item, url } : item
+    ))
+    setShowGallery(null)
+    toast.success('Görsel seçildi, kaydetmeyi unutmayın!')
+  }
 
   useEffect(() => {
     fetchMedia()
@@ -157,9 +150,38 @@ export function UnifiedMediaManager() {
     }
   }
 
+  // Unsplash/Pexels URL'lerini otomatik düzelt
+  const normalizeImageUrl = (url: string): string => {
+    if (!url) return url
+    
+    // Unsplash sayfa URL'sini resim URL'sine çevir
+    // https://unsplash.com/photos/xxxxx-PHOTOID -> https://images.unsplash.com/photo-PHOTOID
+    const unsplashPageMatch = url.match(/unsplash\.com\/photos\/[^\/]+-([a-zA-Z0-9_-]+)/)
+    if (unsplashPageMatch) {
+      // Photo ID'yi al ve source API kullan (daha güvenilir)
+      return `https://source.unsplash.com/${unsplashPageMatch[1]}/1600x900`
+    }
+    
+    // unsplash.com/photos/PHOTOID formatı
+    const unsplashSimpleMatch = url.match(/unsplash\.com\/photos\/([a-zA-Z0-9_-]+)$/)
+    if (unsplashSimpleMatch) {
+      return `https://source.unsplash.com/${unsplashSimpleMatch[1]}/1600x900`
+    }
+    
+    // Pexels sayfa URL'sini düzelt
+    // https://www.pexels.com/photo/xxxxx-12345678/ -> direkt kullanılamaz, uyarı ver
+    if (url.includes('pexels.com/photo/') && !url.includes('images.pexels.com')) {
+      toast.error('Pexels için resme sağ tıklayıp "Resim adresini kopyala" kullanın')
+      return url
+    }
+    
+    return url
+  }
+
   const handleUrlChange = (key: string, url: string) => {
+    const normalizedUrl = normalizeImageUrl(url)
     setMediaItems(prev => prev.map(item =>
-      item.key === key ? { ...item, url } : item
+      item.key === key ? { ...item, url: normalizedUrl } : item
     ))
   }
 
@@ -175,22 +197,32 @@ export function UnifiedMediaManager() {
       const item = mediaItems.find(m => m.key === key)
       if (!item) throw new Error('Item not found')
 
-      const { error } = await supabase
-        .from('site_images')
-        .upsert({
+      console.log('Saving media:', { key: item.key, url: item.url, alt_text: item.alt_text })
+
+      // Use API endpoint instead of direct Supabase call
+      const response = await fetch('/api/admin/save-media', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           key: item.key,
           url: item.url,
           alt_text: item.alt_text
-        }, {
-          onConflict: 'key'
         })
+      })
 
-      if (error) throw error
+      console.log('Response status:', response.status)
+      
+      const result = await response.json()
+      console.log('Response body:', result)
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Kaydetme hatası')
+      }
 
       toast.success(`${item.label} kaydedildi`)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Save error:', error)
-      toast.error('Kaydetme hatası')
+      toast.error(error?.message || 'Kaydetme hatası')
     } finally {
       setSaving(null)
     }
@@ -210,20 +242,22 @@ export function UnifiedMediaManager() {
 
       const result = await response.json()
 
-      if (!response.ok) throw new Error(result.error)
+      if (!response.ok) {
+        throw new Error(result.error || 'Yükleme başarısız')
+      }
 
       // Update local state
       setMediaItems(prev => prev.map(item =>
         item.key === key ? { ...item, url: result.url } : item
       ))
 
-      toast.success('Dosya yüklendi')
+      toast.success(result.message || 'Dosya yüklendi')
 
       // Auto-save after upload
       setTimeout(() => handleSave(key), 500)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Upload error:', error)
-      toast.error('Yükleme hatası')
+      toast.error(error?.message || 'Yükleme hatası')
     } finally {
       setUploading(null)
     }
@@ -262,12 +296,12 @@ export function UnifiedMediaManager() {
       </div>
 
       <Tabs defaultValue="hero" className="w-full">
-        <TabsList className="bg-slate-900 border border-white/10">
+        <TabsList className="bg-slate-800/80 border border-white/10">
           {mediaCategories.map(category => (
             <TabsTrigger
               key={category.id}
               value={category.id}
-              className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400"
+              className="text-slate-300 data-[state=active]:bg-emerald-500 data-[state=active]:text-white"
             >
               <category.icon className="h-4 w-4 mr-2" />
               {category.name}
@@ -351,7 +385,7 @@ export function UnifiedMediaManager() {
                         </div>
 
                         {/* Actions */}
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                           <input
                             ref={(el) => { fileInputRefs.current[item.key] = el }}
                             type="file"
@@ -382,6 +416,19 @@ export function UnifiedMediaManager() {
                             )}
                           </Button>
 
+                          {/* Galeri Seç Butonu - sadece resimler için */}
+                          {item.key !== 'hero_video' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setShowGallery(item.key)}
+                              className="bg-purple-500/20 border-purple-500/30 hover:bg-purple-500/30 text-purple-300"
+                            >
+                              <Search className="h-3 w-3 mr-2" />
+                              Galeriden Seç
+                            </Button>
+                          )}
+
                           <Button
                             size="sm"
                             onClick={() => handleSave(item.key)}
@@ -401,6 +448,48 @@ export function UnifiedMediaManager() {
                             )}
                           </Button>
                         </div>
+
+                        {/* Galeri Popup */}
+                        {showGallery === item.key && (
+                          <div className="mt-4 p-4 bg-slate-800 rounded-lg border border-white/10">
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className="text-white font-medium">Hazır Görseller</h4>
+                              <Button size="sm" variant="ghost" onClick={() => setShowGallery(null)}>
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <div className="space-y-4">
+                              <div>
+                                <p className="text-xs text-slate-400 mb-2">🚴 Bisiklet & Yarış</p>
+                                <div className="grid grid-cols-3 gap-2">
+                                  {PRESET_IMAGES.cycling.map((img, i) => (
+                                    <button
+                                      key={i}
+                                      onClick={() => handleSelectFromGallery(item.key, img.url)}
+                                      className="aspect-video rounded overflow-hidden border-2 border-transparent hover:border-emerald-500 transition-all"
+                                    >
+                                      <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                              <div>
+                                <p className="text-xs text-slate-400 mb-2">🌿 Doğa</p>
+                                <div className="grid grid-cols-3 gap-2">
+                                  {PRESET_IMAGES.nature.map((img, i) => (
+                                    <button
+                                      key={i}
+                                      onClick={() => handleSelectFromGallery(item.key, img.url)}
+                                      className="aspect-video rounded overflow-hidden border-2 border-transparent hover:border-emerald-500 transition-all"
+                                    >
+                                      <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       {/* Preview */}
@@ -415,6 +504,8 @@ export function UnifiedMediaManager() {
                                 muted
                                 loop
                                 autoPlay
+                                playsInline
+                                controls
                               />
                             </div>
                           ) : item.key === 'logo' || item.key === 'favicon' ? (
@@ -463,13 +554,18 @@ export function UnifiedMediaManager() {
       </Tabs>
 
       <Card className="bg-blue-500/10 border-blue-500/20">
-        <CardContent className="p-4">
+        <CardContent className="p-4 space-y-2">
           <p className="text-blue-400 text-sm flex items-start gap-2">
             <ImageIcon className="h-5 w-5 mt-0.5 flex-shrink-0" />
             <span>
-              <strong>İpucu:</strong> Görselleri Supabase Storage'a yüklemek için "Dosya Yükle" butonunu kullanın.
-              Harici URL'ler (Unsplash, Pexels vb.) de desteklenir. Değişiklikleri kaydetmeyi unutmayın!
+              <strong>İpucu:</strong> Görselleri Supabase Storage'a yüklemek için "Dosya Yükle" butonunu kullanın (maks. 4MB).
+              Harici URL'ler de desteklenir. <strong>Değişiklikleri kaydetmeyi unutmayın!</strong>
             </span>
+          </p>
+          <p className="text-amber-400 text-xs ml-7">
+            ⚠️ <strong>Unsplash için:</strong> Sayfa URL'si değil, doğrudan resim URL'si kullanın.<br/>
+            ✅ Doğru: <code className="bg-slate-800 px-1 rounded">https://images.unsplash.com/photo-xxxxx</code><br/>
+            ❌ Yanlış: <code className="bg-slate-800 px-1 rounded">https://unsplash.com/photos/xxxxx</code>
           </p>
         </CardContent>
       </Card>

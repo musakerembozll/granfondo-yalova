@@ -17,7 +17,7 @@ const iconMap: Record<string, any> = {
     MapPin
 };
 
-export const revalidate = 30; // Revalidate every 30 seconds
+export const revalidate = 300; // Revalidate every 5 minutes
 
 export default async function HakkindaPage() {
     const aboutContent = await getAboutPageContent();
@@ -60,7 +60,7 @@ export default async function HakkindaPage() {
             <Navbar />
 
             <div className="flex-1 pt-28 pb-16">
-                <div className="container px-4 mx-auto max-w-5xl">
+                <div className="container px-4 mx-auto max-w-5xl relative z-10">
                     {/* Hero */}
                     <div className="text-center mb-16">
                         <h1 className="text-4xl md:text-5xl font-bold mb-4">

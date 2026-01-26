@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { Newspaper, Plus, Trash2, Edit2, Loader2, Save, X, Eye, EyeOff, Calendar, Image } from "lucide-react"
+import { Newspaper, Plus, Trash2, Edit2, Loader2, Save, X, Eye, EyeOff, Calendar, Image, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -34,6 +34,8 @@ export function NewsManager({ items }: Props) {
     const [showForm, setShowForm] = useState(false)
     const [editingItem, setEditingItem] = useState<NewsItem | null>(null)
     const [loading, setLoading] = useState(false)
+    const [uploading, setUploading] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
     const [formData, setFormData] = useState({
         title: '',
         excerpt: '',
@@ -44,6 +46,37 @@ export function NewsManager({ items }: Props) {
         is_published: false
     })
     const router = useRouter()
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+        
+        setUploading(true)
+        try {
+            const formDataUpload = new FormData()
+            formDataUpload.append('file', file)
+            formDataUpload.append('key', `news_${Date.now()}`)
+            
+            const response = await fetch('/api/admin/upload', {
+                method: 'POST',
+                body: formDataUpload
+            })
+            
+            const result = await response.json()
+            
+            if (response.ok && result.url) {
+                setFormData(prev => ({ ...prev, image_url: result.url }))
+            } else {
+                alert('Yükleme başarısız: ' + (result.error || 'Bilinmeyen hata'))
+            }
+        } catch (error) {
+            console.error('Upload error:', error)
+            alert('Yükleme sırasında hata oluştu')
+        } finally {
+            setUploading(false)
+            if (fileInputRef.current) fileInputRef.current.value = ''
+        }
+    }
 
     const resetForm = () => {
         setFormData({
@@ -147,13 +180,49 @@ export function NewsManager({ items }: Props) {
                         </div>
 
                         <div>
-                            <label className="block text-sm text-slate-400 mb-2">Görsel URL</label>
-                            <Input
-                                value={formData.image_url}
-                                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                                placeholder="https://example.com/image.jpg"
-                                className="bg-slate-800 border-white/10 text-white"
-                            />
+                            <label className="block text-sm text-slate-400 mb-2">Görsel</label>
+                            <div className="space-y-3">
+                                <div className="flex gap-2">
+                                    <Input
+                                        value={formData.image_url}
+                                        onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                                        placeholder="https://example.com/image.jpg veya dosya yükleyin"
+                                        className="bg-slate-800 border-white/10 text-white flex-1"
+                                    />
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        onChange={handleFileUpload}
+                                        accept="image/*"
+                                        className="hidden"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        disabled={uploading}
+                                        className="bg-slate-800 border-white/10 hover:bg-slate-700 text-white"
+                                    >
+                                        {uploading ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <Upload className="h-4 w-4" />
+                                        )}
+                                        <span className="ml-2">{uploading ? 'Yükleniyor...' : 'Dosya Yükle'}</span>
+                                    </Button>
+                                </div>
+                                {formData.image_url && (
+                                    <div className="flex items-center gap-3">
+                                        <img 
+                                            src={formData.image_url} 
+                                            alt="Önizleme" 
+                                            className="h-16 w-24 object-cover rounded border border-white/10"
+                                            onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+                                        />
+                                        <span className="text-xs text-slate-500 truncate max-w-xs">{formData.image_url}</span>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div>

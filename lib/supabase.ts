@@ -4,12 +4,29 @@ import { createBrowserClient } from '@supabase/ssr'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// Standard client for general operations
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Standard client for general operations - use this everywhere
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+    }
+})
 
-// Browser client for auth operations (SSR compatible)
+// Browser client for auth operations (SSR compatible) - avoid creating multiple instances
+let browserClient: ReturnType<typeof createBrowserClient> | null = null
+
 export function createSupabaseBrowserClient() {
-    return createBrowserClient(supabaseUrl, supabaseAnonKey)
+    if (typeof window === 'undefined') {
+        // Server-side: create new client each time
+        return createBrowserClient(supabaseUrl, supabaseAnonKey)
+    }
+    
+    // Client-side: reuse the same instance
+    if (!browserClient) {
+        browserClient = createBrowserClient(supabaseUrl, supabaseAnonKey)
+    }
+    return browserClient
 }
 
 // Types

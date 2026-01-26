@@ -1,8 +1,8 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Download } from "lucide-react"
-import * as XLSX from "xlsx"
+import { Download, Loader2 } from "lucide-react"
 
 interface ExportButtonProps {
     applications: {
@@ -24,7 +24,14 @@ interface ExportButtonProps {
 }
 
 export function ExportButton({ applications }: ExportButtonProps) {
-    const handleExport = () => {
+    const [loading, setLoading] = useState(false)
+
+    const handleExport = async () => {
+        setLoading(true)
+        
+        // Dynamic import - reduces initial bundle size by ~200KB
+        const XLSX = await import("xlsx")
+        
         // Veriyi Excel formatına dönüştür
         const data = applications.map((app, index) => ({
             "Sıra": index + 1,
@@ -69,14 +76,21 @@ export function ExportButton({ applications }: ExportButtonProps) {
         // Dosyayı indir
         const fileName = `GranFondo_Basvurular_${new Date().toISOString().split('T')[0]}.xlsx`
         XLSX.writeFile(workbook, fileName)
+        
+        setLoading(false)
     }
 
     return (
         <Button
             onClick={handleExport}
+            disabled={loading}
             className="bg-emerald-500 hover:bg-emerald-600 text-white"
         >
-            <Download className="mr-2 h-4 w-4" />
+            {loading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+                <Download className="mr-2 h-4 w-4" />
+            )}
             Excel İndir ({applications.length})
         </Button>
     )

@@ -4,6 +4,7 @@ import { supabase, Application } from "@/lib/supabase"
 import { revalidatePath } from "next/cache"
 import { ApplicationSchema, EventSchema } from "@/lib/validation/schemas"
 import { sanitizeText } from "@/lib/security/sanitize"
+import { encrypt, decrypt, isEncrypted, maskTcNo } from "@/lib/security/encryption"
 
 export async function submitApplication(data: unknown) {
     // Validate input with Zod schema
@@ -16,11 +17,14 @@ export async function submitApplication(data: unknown) {
 
     const typedData = validationResult.data
 
+    // Encrypt TC Kimlik No before storing
+    const encryptedTcNo = encrypt(typedData.tcNo)
+
     const { data: newApp, error } = await supabase
         .from('applications')
         .insert({
             full_name: typedData.fullName,
-            tc_no: typedData.tcNo,
+            tc_no: encryptedTcNo,
             email: typedData.email,
             phone: typedData.phone || null,
             birth_date: typedData.birthDate || null,
@@ -192,16 +196,27 @@ export async function getDashboardStats() {
 
     const totalApplications = applications?.length || 0
     const activeEvents = events?.filter(e => e.status === 'published').length || 0
-    const recentApplications = (applications || []).slice(0, 5).map(app => ({
-        id: app.id,
-        fullName: app.full_name,
-        tcNo: app.tc_no,
-        email: app.email,
-        category: app.category,
-        status: app.status,
-        createdAt: app.created_at,
-        receiptUrl: app.receipt_url
-    }))
+    const recentApplications = (applications || []).slice(0, 5).map(app => {
+        // Decrypt TC No if encrypted, mask for display
+        let tcNo = app.tc_no
+        try {
+            if (isEncrypted(app.tc_no)) {
+                tcNo = decrypt(app.tc_no)
+            }
+        } catch {
+            tcNo = 'Çözülemedi'
+        }
+        return {
+            id: app.id,
+            fullName: app.full_name,
+            tcNo: maskTcNo(tcNo), // Show masked version in dashboard
+            email: app.email,
+            category: app.category,
+            status: app.status,
+            createdAt: app.created_at,
+            receiptUrl: app.receipt_url
+        }
+    })
 
     const allApplications = (applications || []).map(app => ({
         id: app.id,
@@ -231,23 +246,34 @@ export async function getApplications() {
         return []
     }
 
-    return (data || []).map(app => ({
-        id: app.id,
-        fullName: app.full_name,
-        tcNo: app.tc_no,
-        email: app.email,
-        phone: app.phone,
-        birthDate: app.birth_date,
-        gender: app.gender,
-        city: app.city,
-        club: app.club,
-        category: app.category,
-        emergencyName: app.emergency_name,
-        emergencyPhone: app.emergency_phone,
-        receiptUrl: app.receipt_url,
-        status: app.status,
-        createdAt: app.created_at
-    }))
+    return (data || []).map(app => {
+        // Decrypt TC No if encrypted
+        let tcNo = app.tc_no
+        try {
+            if (isEncrypted(app.tc_no)) {
+                tcNo = decrypt(app.tc_no)
+            }
+        } catch {
+            tcNo = 'Çözülemedi'
+        }
+        return {
+            id: app.id,
+            fullName: app.full_name,
+            tcNo, // Admin panel gets full TC No
+            email: app.email,
+            phone: app.phone,
+            birthDate: app.birth_date,
+            gender: app.gender,
+            city: app.city,
+            club: app.club,
+            category: app.category,
+            emergencyName: app.emergency_name,
+            emergencyPhone: app.emergency_phone,
+            receiptUrl: app.receipt_url,
+            status: app.status,
+            createdAt: app.created_at
+        }
+    })
 }
 
 export async function getEvents() {

@@ -7,7 +7,7 @@ import { getActiveEvent } from "@/app/actions"
 import { getSiteSettings } from "@/app/content-actions"
 import { ApplicationForm } from "@/components/forms/application-form"
 
-export const revalidate = 30
+export const revalidate = 300 // Revalidate every 5 minutes
 
 export default async function ApplicationPage() {
     const activeEvent = await getActiveEvent()

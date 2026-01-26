@@ -16,7 +16,7 @@ import { getSiteData } from "@/lib/site-content";
 import { formatEventDate } from "@/lib/date-utils";
 import { getActiveEvent } from "@/app/actions";
 
-export const revalidate = 30; // Revalidate every 30 seconds
+export const revalidate = 300; // Revalidate every 5 minutes
 
 export default async function Home() {
   const galleryItems = await getGalleryItems()
@@ -31,7 +31,9 @@ export default async function Home() {
   // Use active event data if available, otherwise fall back to site settings
   const eventDate = activeEvent ? formatEventDate(activeEvent.date) : formatEventDate(siteSettings.event_date)
   const heroImageUrl = activeEvent?.background_image_url || images.hero_image
-  const heroVideoUrl = images.hero_video // Keep video from site settings for now
+  // Use video from active event first, then site_images, then default
+  const defaultVideo = "https://videos.pexels.com/video-files/5793953/5793953-uhd_2560_1440_30fps.mp4"
+  const heroVideoUrl = activeEvent?.hero_video_url || (images.hero_video && images.hero_video.trim() !== '' ? images.hero_video : defaultVideo)
 
   // Helper function to check if section is visible (default to true if not set)
   const isSectionVisible = (key: string) => sectionSettings[key] !== false

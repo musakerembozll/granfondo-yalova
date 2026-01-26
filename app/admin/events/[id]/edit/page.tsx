@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { ArrowLeft, Save, Loader2, Upload, Image as ImageIcon, Star } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Upload, Image as ImageIcon, Star, CreditCard, Phone, Palette, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { toast as sonnerToast } from "sonner";
+import { THEME_PRESETS } from "@/lib/theme-presets";
 
 interface PageProps {
     params: Promise<{ id: string }>
@@ -36,10 +37,20 @@ export default function EditEventPage({ params }: PageProps) {
         description?: string;
         photo_url?: string;
         background_image_url?: string;
+        hero_video_url?: string;
         active_event?: boolean;
         applications_open?: boolean;
         short_price?: number;
         long_price?: number;
+        // Payment
+        bank_name?: string;
+        account_holder?: string;
+        iban?: string;
+        // Contact
+        contact_email?: string;
+        contact_phone?: string;
+        // Theme
+        theme_preset?: string;
     } | null>(null);
 
     useEffect(() => {
@@ -87,10 +98,20 @@ export default function EditEventPage({ params }: PageProps) {
             description: formData.get("description") || "",
             photo_url: event?.photo_url || "",
             background_image_url: event?.background_image_url || "",
+            hero_video_url: event?.hero_video_url || "",
             active_event: formData.get("active_event") === "on",
             applications_open: formData.get("applications_open") === "on",
             short_price: formData.get("short_price") ? Number(formData.get("short_price")) : undefined,
             long_price: formData.get("long_price") ? Number(formData.get("long_price")) : undefined,
+            // Payment
+            bank_name: formData.get("bank_name") || "",
+            account_holder: formData.get("account_holder") || "",
+            iban: formData.get("iban") || "",
+            // Contact
+            contact_email: formData.get("contact_email") || "",
+            contact_phone: formData.get("contact_phone") || "",
+            // Theme
+            theme_preset: formData.get("theme_preset") || "emerald",
         };
 
         try {
@@ -319,6 +340,198 @@ export default function EditEventPage({ params }: PageProps) {
                                     <img src={event.background_image_url} alt="Background" className="w-full h-full object-contain" />
                                 </div>
                             )}
+                        </div>
+
+                        {/* Hero Video */}
+                        <div className="grid gap-2">
+                            <Label className="text-slate-300 flex items-center gap-2">
+                                <Video className="h-4 w-4" />
+                                Ana Sayfa Video (Opsiyonel)
+                            </Label>
+                            <div className="flex gap-2">
+                                <Input
+                                    type="text"
+                                    value={event.hero_video_url || ""}
+                                    onChange={(e) => setEvent(prev => prev ? { ...prev, hero_video_url: e.target.value } : null)}
+                                    placeholder="https://... (MP4 video URL)"
+                                    className="bg-slate-950 border-white/10 text-white"
+                                />
+                                <input
+                                    type="file"
+                                    accept="video/*"
+                                    className="hidden"
+                                    id="video-upload"
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            setUploading('hero_video_url');
+                                            const formData = new FormData();
+                                            formData.append('file', file);
+                                            formData.append('key', `event_${id}_video`);
+                                            fetch('/api/admin/upload', { method: 'POST', body: formData })
+                                                .then(r => r.json())
+                                                .then(result => {
+                                                    if (result.url) {
+                                                        setEvent(prev => prev ? { ...prev, hero_video_url: result.url } : null);
+                                                        sonnerToast.success('Video yüklendi');
+                                                    }
+                                                })
+                                                .catch(() => sonnerToast.error('Video yükleme hatası'))
+                                                .finally(() => setUploading(null));
+                                        }
+                                    }}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => document.getElementById('video-upload')?.click()}
+                                    disabled={uploading === 'hero_video_url'}
+                                    className="bg-slate-800 border-white/10"
+                                >
+                                    {uploading === 'hero_video_url' ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                        <Upload className="h-4 w-4" />
+                                    )}
+                                </Button>
+                            </div>
+                            {event.hero_video_url && (
+                                <div className="mt-2 w-full aspect-video rounded overflow-hidden bg-slate-800">
+                                    <video src={event.hero_video_url} controls muted className="w-full h-full object-contain" />
+                                </div>
+                            )}
+                            <p className="text-xs text-slate-500">Video yoksa arka plan görseli gösterilir</p>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Theme Selection */}
+                <Card className="bg-slate-900/50 border-white/10 backdrop-blur-sm">
+                    <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                            <Palette className="h-5 w-5 text-purple-400" />
+                            Tema Rengi
+                        </CardTitle>
+                        <CardDescription className="text-slate-400">
+                            Bu etkinlik aktif olduğunda sitenin tamamı bu tema renklerini kullanacak
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {Object.entries(THEME_PRESETS).map(([key, theme]) => (
+                                <label
+                                    key={key}
+                                    className={`relative flex flex-col items-center p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                                        event.theme_preset === key 
+                                            ? 'border-white bg-white/10' 
+                                            : 'border-white/10 hover:border-white/30'
+                                    }`}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="theme_preset"
+                                        value={key}
+                                        checked={event.theme_preset === key}
+                                        onChange={() => setEvent(prev => prev ? { ...prev, theme_preset: key } : null)}
+                                        className="sr-only"
+                                    />
+                                    <div 
+                                        className="w-10 h-10 rounded-full mb-2"
+                                        style={{ background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})` }}
+                                    />
+                                    <span className="text-sm text-white">{theme.name}</span>
+                                    {event.theme_preset === key && (
+                                        <div className="absolute top-2 right-2 w-4 h-4 bg-white rounded-full flex items-center justify-center">
+                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: theme.primary }} />
+                                        </div>
+                                    )}
+                                </label>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Payment Info */}
+                <Card className="bg-slate-900/50 border-white/10 backdrop-blur-sm">
+                    <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                            <CreditCard className="h-5 w-5 text-amber-400" />
+                            Ödeme Bilgileri
+                        </CardTitle>
+                        <CardDescription className="text-slate-400">
+                            Bu etkinlik için ödeme alınacak banka bilgileri
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="bank_name" className="text-slate-300">Banka Adı</Label>
+                                <Input
+                                    name="bank_name"
+                                    id="bank_name"
+                                    defaultValue={event.bank_name || ""}
+                                    placeholder="Ziraat Bankası"
+                                    className="bg-slate-950 border-white/10 text-white"
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="account_holder" className="text-slate-300">Hesap Sahibi</Label>
+                                <Input
+                                    name="account_holder"
+                                    id="account_holder"
+                                    defaultValue={event.account_holder || ""}
+                                    placeholder="GranFondo Yalova Spor Kulübü"
+                                    className="bg-slate-950 border-white/10 text-white"
+                                />
+                            </div>
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="iban" className="text-slate-300">IBAN</Label>
+                            <Input
+                                name="iban"
+                                id="iban"
+                                defaultValue={event.iban || ""}
+                                placeholder="TR00 0000 0000 0000 0000 0000 00"
+                                className="bg-slate-950 border-white/10 text-white font-mono"
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Contact Info */}
+                <Card className="bg-slate-900/50 border-white/10 backdrop-blur-sm">
+                    <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                            <Phone className="h-5 w-5 text-cyan-400" />
+                            İletişim Bilgileri
+                        </CardTitle>
+                        <CardDescription className="text-slate-400">
+                            Bu etkinlik için iletişim bilgileri
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="contact_email" className="text-slate-300">E-posta</Label>
+                                <Input
+                                    name="contact_email"
+                                    id="contact_email"
+                                    type="email"
+                                    defaultValue={event.contact_email || ""}
+                                    placeholder="info@etkinlik.com"
+                                    className="bg-slate-950 border-white/10 text-white"
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="contact_phone" className="text-slate-300">Telefon</Label>
+                                <Input
+                                    name="contact_phone"
+                                    id="contact_phone"
+                                    defaultValue={event.contact_phone || ""}
+                                    placeholder="+90 (5XX) XXX XX XX"
+                                    className="bg-slate-950 border-white/10 text-white"
+                                />
+                            </div>
                         </div>
                     </CardContent>
                 </Card>

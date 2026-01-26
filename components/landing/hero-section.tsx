@@ -22,6 +22,7 @@ export function HeroSection({
     imageUrl = "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=2070&auto=format&fit=crop"
 }: HeroSectionProps) {
     const [videoLoaded, setVideoLoaded] = useState(false)
+    const [videoError, setVideoError] = useState(false)
     const sectionRef = useRef<HTMLElement>(null)
 
     // Parallax effect
@@ -34,30 +35,40 @@ export function HeroSection({
     const textY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"])
     const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
 
+    // Show video if loaded successfully, show image if video failed or still loading
+    const showVideo = videoLoaded && !videoError
+
     return (
         <section ref={sectionRef} className="relative h-screen flex items-center justify-center overflow-hidden">
             {/* Video Background with Parallax */}
             <motion.div
-                className="absolute inset-0 bg-slate-900"
+                className="absolute inset-0 bg-slate-950"
                 style={{ y: backgroundY }}
             >
                 {/* Video */}
-                <video
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    onLoadedData={() => setVideoLoaded(true)}
-                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${videoLoaded ? 'opacity-40' : 'opacity-0'}`}
-                >
-                    <source src={videoUrl} type="video/mp4" />
-                </video>
+                {!videoError && (
+                    <video
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        preload="auto"
+                        onCanPlay={() => setVideoLoaded(true)}
+                        onLoadedData={() => setVideoLoaded(true)}
+                        onError={() => setVideoError(true)}
+                        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${showVideo ? 'opacity-60' : 'opacity-0'}`}
+                    >
+                        <source src={videoUrl} type="video/mp4" />
+                    </video>
+                )}
 
-                {/* Fallback Image (shows while video loads) */}
-                <div
-                    className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${videoLoaded ? 'opacity-0' : 'opacity-40'}`}
-                    style={{ backgroundImage: `url('${imageUrl}')` }}
-                />
+                {/* Fallback Image - only show if video fails, not while loading */}
+                {videoError && (
+                    <div
+                        className="absolute inset-0 bg-cover bg-center opacity-60"
+                        style={{ backgroundImage: `url('${imageUrl}')` }}
+                    />
+                )}
 
                 {/* Gradient overlays */}
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/50" />

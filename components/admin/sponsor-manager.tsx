@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Trash2, GripVertical } from "lucide-react"
+import { Plus, Trash2, GripVertical, Upload, Loader2 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
 
@@ -19,11 +19,45 @@ interface Sponsor {
 export function SponsorManager() {
     const [sponsors, setSponsors] = useState<Sponsor[]>([])
     const [loading, setLoading] = useState(true)
+    const [uploading, setUploading] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
     const [newSponsor, setNewSponsor] = useState({ name: "", logo_url: "", website: "" })
 
     useEffect(() => {
         fetchSponsors()
     }, [])
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+        
+        setUploading(true)
+        try {
+            const formData = new FormData()
+            formData.append('file', file)
+            formData.append('key', `sponsor_${Date.now()}`)
+            
+            const response = await fetch('/api/admin/upload', {
+                method: 'POST',
+                body: formData
+            })
+            
+            const result = await response.json()
+            
+            if (response.ok && result.url) {
+                setNewSponsor(prev => ({ ...prev, logo_url: result.url }))
+                toast.success('Logo yüklendi!')
+            } else {
+                toast.error('Yükleme başarısız: ' + (result.error || 'Bilinmeyen hata'))
+            }
+        } catch (error) {
+            console.error('Upload error:', error)
+            toast.error('Yükleme sırasında hata oluştu')
+        } finally {
+            setUploading(false)
+            if (fileInputRef.current) fileInputRef.current.value = ''
+        }
+    }
 
     const fetchSponsors = async () => {
         const { data } = await supabase
@@ -82,28 +116,66 @@ export function SponsorManager() {
                     <CardTitle className="text-white">Yeni Sponsor Ekle</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid md:grid-cols-4 gap-4">
-                        <Input
-                            placeholder="Sponsor Adı"
-                            value={newSponsor.name}
-                            onChange={(e) => setNewSponsor({ ...newSponsor, name: e.target.value })}
-                            className="bg-slate-800 border-white/10 text-white"
-                        />
-                        <Input
-                            placeholder="Logo URL veya Emoji (🏢)"
-                            value={newSponsor.logo_url}
-                            onChange={(e) => setNewSponsor({ ...newSponsor, logo_url: e.target.value })}
-                            className="bg-slate-800 border-white/10 text-white"
-                        />
-                        <Input
-                            placeholder="Website (opsiyonel)"
-                            value={newSponsor.website}
-                            onChange={(e) => setNewSponsor({ ...newSponsor, website: e.target.value })}
-                            className="bg-slate-800 border-white/10 text-white"
-                        />
+                    <div className="space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <Input
+                                placeholder="Sponsor Adı"
+                                value={newSponsor.name}
+                                onChange={(e) => setNewSponsor({ ...newSponsor, name: e.target.value })}
+                                className="bg-slate-800 border-white/10 text-white"
+                            />
+                            <Input
+                                placeholder="Website (opsiyonel)"
+                                value={newSponsor.website}
+                                onChange={(e) => setNewSponsor({ ...newSponsor, website: e.target.value })}
+                                className="bg-slate-800 border-white/10 text-white"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm text-slate-400 mb-2">Logo</label>
+                            <div className="flex gap-2">
+                                <Input
+                                    placeholder="Logo URL veya Emoji (🏢) veya dosya yükleyin"
+                                    value={newSponsor.logo_url}
+                                    onChange={(e) => setNewSponsor({ ...newSponsor, logo_url: e.target.value })}
+                                    className="bg-slate-800 border-white/10 text-white flex-1"
+                                />
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleFileUpload}
+                                    accept="image/*"
+                                    className="hidden"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={uploading}
+                                    className="bg-slate-800 border-white/10 hover:bg-slate-700 text-white"
+                                >
+                                    {uploading ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                        <Upload className="h-4 w-4" />
+                                    )}
+                                    <span className="ml-2 hidden sm:inline">{uploading ? 'Yükleniyor...' : 'Logo Yükle'}</span>
+                                </Button>
+                            </div>
+                            {newSponsor.logo_url && newSponsor.logo_url.startsWith('http') && (
+                                <div className="mt-2">
+                                    <img 
+                                        src={newSponsor.logo_url} 
+                                        alt="Logo önizleme" 
+                                        className="h-12 w-auto object-contain rounded border border-white/10 bg-white p-1"
+                                        onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+                                    />
+                                </div>
+                            )}
+                        </div>
                         <Button onClick={addSponsor} className="bg-emerald-500 hover:bg-emerald-600">
                             <Plus className="h-4 w-4 mr-2" />
-                            Ekle
+                            Sponsor Ekle
                         </Button>
                     </div>
                 </CardContent>

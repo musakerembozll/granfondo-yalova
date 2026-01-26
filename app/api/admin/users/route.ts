@@ -99,15 +99,21 @@ export async function GET(request: NextRequest) {
             })
         })
 
-        // Merge with profiles
+        // Merge with profiles - profile data should take priority
         if (profiles) {
             profiles.forEach(profile => {
                 const existing = usersMap.get(profile.id)
                 if (existing) {
                     usersMap.set(profile.id, {
                         ...existing,
-                        ...profile,
-                        email: existing.email // Keep email from auth
+                        full_name: profile.full_name || existing.full_name,
+                        phone: profile.phone || existing.phone,
+                        gender: profile.gender || existing.gender,
+                        birth_date: profile.birth_date || existing.birth_date,
+                        email: existing.email || profile.email, // Prefer auth email
+                        created_at: profile.created_at || existing.created_at,
+                        updated_at: profile.updated_at || existing.updated_at,
+                        provider: existing.provider || profile.provider
                     })
                 } else {
                     usersMap.set(profile.id, {

@@ -16,7 +16,7 @@ import { getSiteData } from "@/lib/site-content";
 import { formatEventDate } from "@/lib/date-utils";
 import { getActiveEvent } from "@/app/actions";
 
-export const revalidate = 300; // Revalidate every 5 minutes
+export const revalidate = 60; // Revalidate every 1 minute
 
 export default async function Home() {
   const galleryItems = await getGalleryItems()
